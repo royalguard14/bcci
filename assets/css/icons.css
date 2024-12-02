@@ -1,0 +1,5 @@
+.icon-white {
+    filter: invert(1) brightness(2);
+    padding-right: .5rem;
+
+}

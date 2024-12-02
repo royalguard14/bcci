@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Set the base directory for the application (if needed)
+RewriteBase /BCCI/
+
+# Rewrite all requests to index.php, except for actual files or directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L,QSA]
