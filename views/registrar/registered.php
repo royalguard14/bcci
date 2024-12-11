@@ -89,7 +89,7 @@ function displayToastMessage($session_key, $toast_class, $title) {
 
 											<td>
 												<form action="pending_student_procced" method="POST" style="display:inline;">
-													<input type="hidden" name="sy_id" value="<?php echo $data['id']; ?>">
+													<input type="hidden" name="user_id" value="<?php echo $data['id']; ?>">
 													<button type="submit" class="btn btn-block btn-outline-info btn-xs">Confirm</button>
 												</form>
 											</td>
@@ -111,7 +111,7 @@ function displayToastMessage($session_key, $toast_class, $title) {
 						</h3>
 					</div>
 					<div class="card-body">
-												<table id="example2" class="table table-bordered table-hover">
+												<table id="example3" class="table table-bordered table-hover">
 							<thead>
 								<tr>
 									<th style="text-align: center;">#</th>
@@ -144,8 +144,8 @@ function displayToastMessage($session_key, $toast_class, $title) {
 
 											<td>
 												<form action="pending_student_procced" method="POST" style="display:inline;">
-													<input type="hidden" name="sy_id" value="<?php echo $data['id']; ?>">
-													<button type="submit" class="btn btn-block btn-outline-info btn-xs">Confirm</button>
+													<input type="hidden" name="user_id" value="<?php echo $data['id']; ?>">
+													<button type="submit" class="btn btn-block btn-outline-info btn-xs">View</button>
 												</form>
 											</td>
 										</tr>

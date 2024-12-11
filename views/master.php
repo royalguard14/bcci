@@ -306,6 +306,18 @@ if (!isset($_SESSION['log_in']) || !$_SESSION['log_in']) {
       "autoWidth": false,
       "responsive": true,
     });
+
+
+
+    $('#example3').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
 </script>
 </body>
 </html>

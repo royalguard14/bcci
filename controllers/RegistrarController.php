@@ -1,6 +1,6 @@
 <?php 
 require_once 'BaseController.php'; 
- 
+
 class RegistrarController extends BaseController { 
     public function __construct($db) { 
         parent::__construct($db, ['7','5','9']);  
@@ -8,9 +8,9 @@ class RegistrarController extends BaseController {
 
 
 
-private function fetchStudentsByStatus($isActive) {
-    $stmt = $this->db->prepare("
-        SELECT
+    private function fetchStudentsByStatus($isActive) {
+        $stmt = $this->db->prepare("
+            SELECT
             u.user_id AS id,
             DATE_FORMAT(u.created_at, '%m/%d/%Y') AS date_register,
             p.sex,
@@ -24,22 +24,22 @@ private function fetchStudentsByStatus($isActive) {
             COALESCE(p.municipality_city, '') AS municipality_city,
             COALESCE(p.province, '') AS province,
             COALESCE(p.contact_number, '') AS contact_number
-        FROM users u
-        LEFT JOIN profiles p ON u.user_id = p.profile_id
-        WHERE 
+            FROM users u
+            LEFT JOIN profiles p ON u.user_id = p.profile_id
+            WHERE 
             u.role_id = 4
             AND u.isActive = :isActive
             AND u.isDelete = 0
-        ORDER BY
+            ORDER BY
             u.created_at ASC
-    ");
-    $stmt->bindParam(':isActive', $isActive, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+            ");
+        $stmt->bindParam(':isActive', $isActive, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-public function show() {
-    try {
+    public function show() {
+        try {
         // Fetch students based on their status
         $pending_students = $this->fetchStudentsByStatus(0); // Pending (isActive = 0)
         $accepted_students = $this->fetchStudentsByStatus(1); // Accepted (isActive = 1)
@@ -68,8 +68,28 @@ public function count(){
 }
 
 
-public function confirm(){
-include 'views/registrar/registered.php';
+public function confirm() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
+        try {
+            $userId = (int)$_POST['user_id'];
+            $stmt = $this->db->prepare("UPDATE users SET isActive = 1 WHERE user_id = :user_id");
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+            
+            if ($stmt->execute()) {
+    
+               $_SESSION['success'] = "User successfully activated!";
+               
+           } else {
+             $_SESSION['error'] = "Failed to update user.";
+
+         }
+     } catch (Exception $e) {
+       $_SESSION['error'] =  "Error: " . $e->getMessage();
+
+   }
+}
+header("Location: /BCCI/pending_student");
+exit();
 
 }
 
@@ -78,7 +98,5 @@ include 'views/registrar/registered.php';
 
 
 
-
-
 }#end
- 
+
