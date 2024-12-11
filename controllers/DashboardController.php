@@ -248,21 +248,21 @@ public function adviserDashboard() {
 
     public function showDashboard() {
         $userRole = $_SESSION['role_id'];
-
-        switch ($userRole) {
-            case 2: // Faculty
-            $this->adviserDashboard();
-            break;
-            case 3: //Learners
-            $this->studentDashboard();
-            break;
-            case 4: //Registrar
-            $this->registrarDashboard();
-            break;
-            default://Parents
-            $this->defaultDashboard();
-            break;
-        }
+        include 'views/dashboard/default_dashboard.php';
+        // switch ($userRole) {
+        //     case 2: // Faculty
+        //     $this->adviserDashboard();
+        //     break;
+        //     case 3: //Learners
+        //     $this->studentDashboard();
+        //     break;
+        //     case 4: //Registrar
+        //     $this->registrarDashboard();
+        //     break;
+        //     default://Parents
+        //     $this->defaultDashboard();
+        //     break;
+        // }
     }
 
 

@@ -16,17 +16,51 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
     </li>
 
 
+<?php if ($_SESSION['role_id'] === 2): ?>
+       <li class="nav-item">
+            <a href="pending_student" class="nav-link <?= ($current_page == 'pending_student') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-calendar-alt"></i>
+              <p>
+                New Registered
+                <span class="badge badge-info right">2</span>
+              </p>
+            </a>
+          </li>
 
+<script>
+$(document).ready(function() {
+    // Function to fetch and update the count
+    function updatePendingStudentCount() {
+        $.ajax({
+            url: 'pending_student_count', // Replace with the correct endpoint for your AJAX handler
+            method: 'GET', // You can also use POST if needed
+            dataType: 'json',
+            success: function(response) {
+                // Update the badge with the count
+                $('span.badge-info.right').text(response.count);
+            },
+            error: function() {
+                console.error('Failed to fetch pending student count.');
+            }
+        });
+    }
 
+    // Call the function every second
+    setInterval(updatePendingStudentCount, 1000);
 
- 
+    // Optionally, call the function immediately when the page loads
+    updatePendingStudentCount();
+});
+</script>
+
+  <?php endif; ?>
 
 
     <!-- Check if the user is an admin -->
     <?php if ($_SESSION['role_id'] === 1): ?>
 
       <li class="nav-header">School Setting</li>
-      <li class="nav-item <?= ($current_page == 'campus-profile' || $current_page == 'campus-grades' || $current_page == 'campus-sections' || $current_page == 'campus-subjects') ? 'menu-is-opening menu-open' : ''; ?>">
+      <li class="nav-item <?= ($current_page == 'campus-profile' || $current_page == 'campus-department' || $current_page == 'campus-sections' || $current_page == 'campus-subjects') ? 'menu-is-opening menu-open' : ''; ?>">
         <a href="#" class="nav-link <?= ($current_page == 'campus-profile' || $current_page == 'campus-grades' || $current_page == 'campus-sections' || $current_page == 'campus-subjects') ? 'active' : ''; ?>">
           <img class="icon-white" src="assets/img/icons/campus.png" alt="Custom Icon" >
           <p>
@@ -42,17 +76,12 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
             </a>
           </li>
           <li class="nav-item">
-            <a href="campus-grades" class="nav-link <?= ($current_page == 'campus-grades') ? 'active' : ''; ?>">
+            <a href="campus-department" class="nav-link <?= ($current_page == 'campus-department') ? 'active' : ''; ?>">
               <i class="far fa-circle nav-icon"></i>
-              <p>Grade</p>
+              <p>Department</p>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="campus-sections" class="nav-link <?= ($current_page == 'campus-sections') ? 'active' : ''; ?>">
-              <i class="far fa-circle nav-icon"></i>
-              <p>Section</p>
-            </a>
-          </li>
+
           <li class="nav-item">
             <a href="campus-subjects" class="nav-link <?= ($current_page == 'campus-subjects') ? 'active' : ''; ?>">
               <i class="far fa-circle nav-icon"></i>

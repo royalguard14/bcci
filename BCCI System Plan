@@ -1,0 +1,20 @@
+BCCI System Plan
+• Roles Management = OK
+• Permission Management = OK
+• Staffs Management = OK
+• Department Management = OK
+• Subject Management = OK 
+• Semester Management = OK
+• Schedule Generator = OK
+• Student Register (Step 1 for Enrollment) = OK
+• Registrar Acccount (Step 2)-Confirm to login = OK
+• Student Logim UI
+	• Dashboard (No idea for UI)
+	• Academic History (Grade)
+	• Document Upload
+• Student Choose Subject (Step 3)
+• Evaluation proccess (Student / registrar for approved status) 
+	the Pre-requsite, already done subject, retake fail subject, schedule conflict
+• Payment Set-up (per unit, others)
+• initial payment
+• print COE by registrar
