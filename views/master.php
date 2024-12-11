@@ -255,6 +255,7 @@ if (!isset($_SESSION['log_in']) || !$_SESSION['log_in']) {
   
 </script>
 <!-- Bootstrap 4 -->
+<script src="assets/js/widget.js"></script>
 <script src="assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- ChartJS -->
 <script src="assets/plugins/chart.js/Chart.min.js"></script>
@@ -283,6 +284,7 @@ if (!isset($_SESSION['log_in']) || !$_SESSION['log_in']) {
 
 
 <!-- DataTables  & Plugins -->
+
 <script src="assets/plugins/datatables/jquery.dataTables.min.js"></script>
 <script src="assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 <script src="assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
@@ -319,5 +321,7 @@ if (!isset($_SESSION['log_in']) || !$_SESSION['log_in']) {
       "responsive": true,
     });
 </script>
+
+
 </body>
 </html>
