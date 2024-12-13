@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 11, 2024 at 07:14 AM
+-- Generation Time: Dec 12, 2024 at 04:35 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.0
 
@@ -20,6 +20,18 @@ SET time_zone = "+00:00";
 --
 -- Database: `bcci`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `academic_record`
+--
+
+CREATE TABLE `academic_record` (
+  `id` int(11) NOT NULL,
+  `c_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -113,9 +125,11 @@ INSERT INTO `department` (`id`, `course_name`, `code`, `room_ids`) VALUES
 CREATE TABLE `enrollment_history` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
-  `grade_level_id` int(11) DEFAULT NULL,
+  `course_id` int(11) NOT NULL,
+  `semester_id` int(11) NOT NULL,
   `section_id` int(11) DEFAULT NULL,
   `adviser_id` int(11) NOT NULL,
+  `status` varchar(30) NOT NULL,
   `academic_year_id` int(11) DEFAULT NULL,
   `enrollment_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -203,19 +217,6 @@ CREATE TABLE `profiles` (
   `contact_number` varchar(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `profiles`
---
-
-INSERT INTO `profiles` (`id`, `photo_path`, `profile_id`, `last_name`, `first_name`, `middle_name`, `sex`, `birth_date`, `house_street_sitio_purok`, `barangay`, `municipality_city`, `province`, `contact_number`, `created_at`) VALUES
-(1, 'assets/documents/38296576/case.png', 272, 'Bautista', 'Ghaizar', 'Atara', '', '1993-10-13', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-07 15:44:38'),
-(2, 'assets/documents/41915834/case.png', 273, 'Bautista', 'Ghaizar', 'Atara', '', '1996-10-13', 'Purok 3 Upper', 'Doongan', 'No Data', 'No Data', '09277294457', '2024-12-07 15:46:13'),
-(3, 'assets/documents/64068633/class diagram.drawio.png', 274, 'Bautista', 'Ghaizar', 'Atara', '', '3131-10-11', 'PUROK 3 UPPER DOONGAN BUTUAN CITY', 'No Data', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-07 15:56:53'),
-(4, 'assets/documents/70776329/case.png', 275, 'Bautista', 'Ghaizar', 'Atara', '', '2024-12-31', 'Purok 3 Upper', 'asd', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-07 16:12:12'),
-(5, 'assets/documents/84730196/case.png', 276, 'Bautista', 'Ghaizar', 'Atara', '', '1993-10-13', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-07 16:12:59'),
-(6, 'assets/documents/74394606/case.png', 277, 'Bautista', 'Ghaizar', 'Atara', '', '1993-10-13', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-07 16:15:21'),
-(7, 'assets/documents/25875077/case.png', 278, 'Bautista', 'Ghaizar', 'Atara', '', '1993-10-13', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-07 16:27:10');
 
 -- --------------------------------------------------------
 
@@ -727,23 +728,23 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `email`, `username`, `password`, `role_id`, `isActive`, `isDelete`, `profile_id`, `created_at`, `updated_at`) VALUES
-(2, 'zhie@zear.developer.com', 'admin', '$2y$10$Y3A7u1B6/Fchy.twJAypLOhLmD1/KCYjy/BGce2P5jUOKThSTXD3u', 1, 1, 0, NULL, '2024-11-03 03:22:39', '2024-11-20 12:18:34'),
-(266, '', 'registrar', '$2y$10$F3I24OvhzcXva/WHz7gXnOZDHrrE4ClwWeRjEg.tAWFBDmHQTHniu', 2, 1, 0, NULL, '2024-12-02 00:38:51', '2024-12-02 00:38:51'),
-(267, '', 'teacher', '$2y$10$fbZlqalMvffD6qtlAf9AUemOIWn7GLv4QSRtQSMSHngM2exdHOFSi', 3, 1, 0, NULL, '2024-12-02 00:39:11', '2024-12-02 00:39:11'),
-(268, '', 'student1', '$2y$10$vpb/MIhDVc.Z0Jvm7oiji.dWvXGEWHuyykVCiGDKQ/6UF3s30mOEy', 4, 1, 0, NULL, '2024-12-02 00:39:27', '2024-12-02 00:39:27'),
-(269, '', 'student2', '$2y$10$.YGT/Bw6BL6V9TSiRXaQAebrUP.krIOcmeFT4FTUL1gE49JfbK9qO', 4, 1, 0, NULL, '2024-12-02 00:39:37', '2024-12-02 00:39:37'),
-(270, '', 'accounting', '$2y$10$Vz/U3mzfZ1QOD/WSAF44e.P8TcxpiFceauMioV8.3MuBsWly4Ynxq', 5, 1, 0, NULL, '2024-12-02 00:39:46', '2024-12-02 00:39:46'),
-(271, '', 'auditor', '$2y$10$gaZT6PYoj2W8FA8Jf/Tc1egcIbHy1xlXCJ6HrnorzGIVz7qOUZHja', 6, 1, 0, NULL, '2024-12-02 00:40:00', '2024-12-02 00:40:00'),
-(272, 'ghaizar.bautistabxucity.edu.ph', '38296576', '$2y$10$iq3VmknudLfS3ztztVbDL.v87jAqjWaEeKfnPf1Mq8LvM32eEDqQK', 4, 1, 0, NULL, '2024-12-07 15:44:38', '2024-12-11 02:45:03'),
-(274, 'ghaizar.bautista@bxucity.edu.ph', '64068633', '$2y$10$c1gJsGBPOzqAt8sL00ntMesqmluunz1.AK/VxUx9pulqvpUXmSTQu', 4, 0, 0, NULL, '2024-12-07 15:56:53', '2024-12-07 15:56:53'),
-(275, 'ghaizar.bautista@bxucity.edu.ph', '70776329', '$2y$10$6gYsQ8CQ21it5qUoO6SLPeIFLaqdYqWIl2p2R1O0fG9LMHqL.y2EO', 4, 0, 0, NULL, '2024-12-07 16:12:12', '2024-12-07 16:12:12'),
-(276, 'ghaizar.bautista@bxucity.edu.ph', '84730196', '$2y$10$SxJfdF606uAroPKeKyk4t.nw3PM0dBtw38B.PWrQvAKRtbkXDmqf2', 4, 0, 0, NULL, '2024-12-07 16:12:59', '2024-12-07 16:12:59'),
-(277, 'ghaizar.bautista@bxucity.edu.ph', '74394606', '$2y$10$Ti9gJ3MHFZw2K9ciieRu8.gRGb/N3aonjMN1noaKG6DHX6d/HCo32', 4, 0, 0, NULL, '2024-12-07 16:15:21', '2024-12-07 16:15:21'),
-(278, 'ghaizar.bautista@bxucity.edu.ph', '25875077', '$2y$10$5iDdOJqobyxdsGukyUlNj.i8DYiZbJg368lQVcnrX120/wvcHPRee', 4, 0, 0, NULL, '2024-12-07 16:27:10', '2024-12-07 16:27:10');
+(1, 'zhie@zear.developer.com', 'admin', '$2y$10$Y3A7u1B6/Fchy.twJAypLOhLmD1/KCYjy/BGce2P5jUOKThSTXD3u', 1, 1, 0, NULL, '2024-11-03 03:22:39', '2024-12-12 03:34:45'),
+(2, '', 'registrar', '$2y$10$F3I24OvhzcXva/WHz7gXnOZDHrrE4ClwWeRjEg.tAWFBDmHQTHniu', 2, 1, 0, NULL, '2024-12-02 00:38:51', '2024-12-12 03:34:52'),
+(3, '', 'teacher', '$2y$10$fbZlqalMvffD6qtlAf9AUemOIWn7GLv4QSRtQSMSHngM2exdHOFSi', 3, 1, 0, NULL, '2024-12-02 00:39:11', '2024-12-12 03:34:54'),
+(4, '', 'student1', '$2y$10$vpb/MIhDVc.Z0Jvm7oiji.dWvXGEWHuyykVCiGDKQ/6UF3s30mOEy', 4, 1, 0, NULL, '2024-12-02 00:39:27', '2024-12-12 03:34:57'),
+(5, '', 'student2', '$2y$10$.YGT/Bw6BL6V9TSiRXaQAebrUP.krIOcmeFT4FTUL1gE49JfbK9qO', 4, 1, 0, NULL, '2024-12-02 00:39:37', '2024-12-12 03:35:00'),
+(6, '', 'accounting', '$2y$10$Vz/U3mzfZ1QOD/WSAF44e.P8TcxpiFceauMioV8.3MuBsWly4Ynxq', 5, 1, 0, NULL, '2024-12-02 00:39:46', '2024-12-12 03:35:04'),
+(7, '', 'auditor', '$2y$10$gaZT6PYoj2W8FA8Jf/Tc1egcIbHy1xlXCJ6HrnorzGIVz7qOUZHja', 6, 1, 0, NULL, '2024-12-02 00:40:00', '2024-12-12 03:35:08');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `academic_record`
+--
+ALTER TABLE `academic_record`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `academic_year`
@@ -777,8 +778,6 @@ ALTER TABLE `department`
 ALTER TABLE `enrollment_history`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
-  ADD KEY `grade_level_id` (`grade_level_id`),
-  ADD KEY `section_id` (`section_id`),
   ADD KEY `enrollment_history_ibfk_4` (`adviser_id`),
   ADD KEY `enrollment_history_ibfk_5` (`academic_year_id`);
 
@@ -862,6 +861,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `academic_record`
+--
+ALTER TABLE `academic_record`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `academic_year`
 --
 ALTER TABLE `academic_year`
@@ -913,7 +918,7 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `profiles`
 --
 ALTER TABLE `profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -949,7 +954,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=279;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
@@ -967,7 +972,7 @@ ALTER TABLE `attendance_records`
 --
 ALTER TABLE `enrollment_history`
   ADD CONSTRAINT `enrollment_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `enrollment_history_ibfk_2` FOREIGN KEY (`grade_level_id`) REFERENCES `grade_level` (`id`),
+  ADD CONSTRAINT `enrollment_history_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `grade_level` (`id`),
   ADD CONSTRAINT `enrollment_history_ibfk_3` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`),
   ADD CONSTRAINT `enrollment_history_ibfk_4` FOREIGN KEY (`adviser_id`) REFERENCES `users` (`user_id`),
   ADD CONSTRAINT `enrollment_history_ibfk_5` FOREIGN KEY (`academic_year_id`) REFERENCES `academic_year` (`id`);

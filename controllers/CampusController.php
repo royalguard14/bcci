@@ -105,34 +105,48 @@ public function createScheduleForSemester() {
         $availableSlots = $emptySchedule; // All available slots to be filled
         shuffle($availableSlots); // Shuffle the available slots to randomize allocation
 
+        // Process each subject
         foreach ($subjects as $subject) {
             $subjectId = $subject['id'];
             $lecUnits = $subject['unit_lec'];
             $labUnits = $subject['unit_lab'];
 
+            // Step 5: Count the existing number of sessions for the same combination of academic_id, course_id, semester, subject_id
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM schedules WHERE academic_id = :academic_id AND course_id = :course_id AND semester = :semester AND subject_id = :subject_id");
+            $stmt->execute([
+                ':academic_id' => $academicYear,
+                ':course_id' => $courseId,
+                ':semester' => $semester['semester'],
+                ':subject_id' => $subjectId,
+            ]);
+            $existingSessionsCount = $stmt->fetchColumn();
+
+            // Calculate the batch number by dividing the existing sessions by 2
+            $batchNumber = floor($existingSessionsCount / 2) + 1;
+
             // Allocate lecture hours
             $lecSessions = ceil($lecUnits / 1.5);
-
             for ($i = 0; $i < $lecSessions; $i++) {
-                $slot = array_pop($availableSlots);
+                $slot = array_pop($availableSlots); // Take a slot for lecture
                 $schedule[] = [
                     'subject_id' => $subjectId,
                     'day' => $slot['day'],
                     'time_slot' => $slot['time'],
                     'type' => 'Lecture',
+                    'batch' => $batchNumber, // Assign calculated batch number
                 ];
             }
 
             // Allocate lab hours
             $labSessions = ceil($labUnits / 1.5);
-
             for ($i = 0; $i < $labSessions; $i++) {
-                $slot = array_pop($availableSlots);
+                $slot = array_pop($availableSlots); // Take a slot for lab
                 $schedule[] = [
                     'subject_id' => $subjectId,
                     'day' => $slot['day'],
                     'time_slot' => $slot['time'],
                     'type' => 'Lab',
+                    'batch' => $batchNumber, // Assign calculated batch number
                 ];
             }
         }
@@ -154,7 +168,7 @@ public function createScheduleForSemester() {
 
             // Only insert if the schedule does not exist
             if ($exists == 0) {
-                $stmt = $this->db->prepare("INSERT INTO schedules (academic_id, course_id, semester, subject_id, day, time_slot, session_type) VALUES (:academic_id, :course_id, :semester, :subject_id, :day, :time_slot, :type)");
+                $stmt = $this->db->prepare("INSERT INTO schedules (academic_id, course_id, semester, subject_id, day, time_slot, session_type, batch) VALUES (:academic_id, :course_id, :semester, :subject_id, :day, :time_slot, :type, :batch)");
                 $stmt->execute([
                     ':academic_id' => $academicYear,
                     ':course_id' => $courseId,
@@ -163,11 +177,13 @@ public function createScheduleForSemester() {
                     ':day' => $entry['day'],
                     ':time_slot' => $entry['time_slot'],
                     ':type' => $entry['type'],
+                    ':batch' => $entry['batch'],
                 ]);
             }
         }
     }
 }
+
 
 
 
@@ -669,6 +685,9 @@ public function deleteCampusSchoolYear() {
 public function updateCampusInfo() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['campus_info'])) {
         // Loop through the posted data and update each record
+
+  
+
         foreach ($_POST['campus_info'] as $id => $function) {
             // Check if the value is an array (e.g., for Operating Days)
             if (is_array($function)) {
@@ -678,12 +697,11 @@ public function updateCampusInfo() {
             }
 
             // Validate the input
-            if (empty($function)) {
-                $_SESSION['error'] = "Error: All fields must be filled in.";
-                header("Location: /BCCI/campus-profile");
-                exit();
-            }
-
+      if ($function === '' && $function !== '0') {
+    $_SESSION['error'] = "Error: All fields must be filled in.";
+    header("Location: /BCCI/campus-profile");
+    exit();
+}
             try {
                 // Update the record in the database
                 $stmt = $this->db->prepare("UPDATE campus_info SET function = :function WHERE id = :id");

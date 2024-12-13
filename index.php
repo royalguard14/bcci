@@ -25,6 +25,7 @@ $requestPath = str_replace($baseUrl . '/', '', $requestPath);
 
 // Define routes
 $routes = [
+  
     'dashboard' => ['controller' => 'DashboardController', 'action' => 'showDashboard'], 
     'login' => ['controller' => 'LoginController', 'action' => 'showLoginForm'],
     'login/submit' => ['controller' => 'LoginController', 'action' => 'handleLogin'],  
@@ -99,6 +100,14 @@ $routes = [
 'pending_student' => ['controller' => 'RegistrarController', 'action' => 'show'],
 'pending_student_count' => ['controller' => 'RegistrarController', 'action' => 'count'],
 'pending_student_procced' => ['controller' => 'RegistrarController', 'action' => 'confirm'],
+
+
+
+'acad_setting' => ['controller' => 'StudentsController', 'action' => 'acad_setup'],
+'updatemycourse' => ['controller' => 'StudentsController', 'action' => 'updatemycourse'],
+'addsubject' => ['controller' => 'StudentsController', 'action' => 'addsubject'],
+'fetchSubject' => ['controller' => 'StudentsController', 'action' => 'getSubjs'],
+'checkScheduleConflict' => ['controller' => 'StudentsController', 'action' => 'checkScheduleConflict'],
 
 
 

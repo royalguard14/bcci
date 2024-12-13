@@ -64,7 +64,7 @@ public function handleLogout() {
     session_destroy();
     
     // Redirect to login page
-    header('Location: /BCCI/login');
+    header('Location: /BCCI/home');
     exit();
 }
 }

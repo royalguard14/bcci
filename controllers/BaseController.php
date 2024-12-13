@@ -12,12 +12,20 @@ function dd($data) {
 class BaseController {
     protected $db;
     protected $timeoutDuration = 3600;  // 1 hour timeout in seconds
+    protected $acads_report;
+
+    protected $campusDataCurrentAcademicYear;
+    protected $campusDataEnrollmentStatus;
+    protected $myEnrollmentStatus;
+    protected $mycourseID;
 
 
     public function __construct($db, $permissions = []) {
         $this->db = $db;
         $this->checkLoginStatus();
         $this->checkSessionTimeout();
+        $this->checkacadsreport();
+        $this->initializeUserDetails();
         // Automatically check permission for the provided actions
         if (!empty($permissions)) {
             $this->checkPermissions($permissions);
@@ -133,6 +141,50 @@ protected function checkEnrollmentStatus($userId, $currentYear) {
 }
 
 
+protected function checkacadsreport(){
+
+        $userId = $_SESSION['user_id'];
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS record_count FROM academic_record WHERE user_id = :user_id");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+     $this->acads_report = $stmt->fetch(PDO::FETCH_ASSOC)['record_count'];
+
+}
+
+    protected function initializeUserDetails() {
+        $userId = $_SESSION['user_id'];
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS record_count FROM academic_record WHERE user_id = :user_id");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        $this->acads_report = $stmt->fetch(PDO::FETCH_ASSOC)['record_count'];
+
+        $stmt = $this->db->prepare("SELECT c_id FROM academic_record WHERE user_id = :user_id");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT); 
+        $stmt->execute();
+        $course_id = $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->mycourseID = $course_id ? (int) $course_id['c_id'] : null;
+
+        $stmt = $this->db->prepare("SELECT function, name FROM campus_info WHERE id IN (5,7) ORDER BY FIELD(id, 5, 7);");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->campusDataCurrentAcademicYear = (int) $result[0]['function'];
+        $this->campusDataEnrollmentStatus = (int) $result[1]['function'];
+
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) AS record_count 
+            FROM enrollment_history eh
+            WHERE 
+            eh.user_id = :user_id
+            AND eh.course_id = :course_id
+            AND eh.academic_year_id = :academic_year_id
+        
+            ");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':course_id', $this->mycourseID, PDO::PARAM_INT); 
+        $stmt->bindParam(':academic_year_id', $this->campusDataCurrentAcademicYear, PDO::PARAM_INT); 
+        $stmt->execute();
+        $this->myEnrollmentStatus = (int) $stmt->fetch(PDO::FETCH_ASSOC)['record_count'];
+    }
 
 
 

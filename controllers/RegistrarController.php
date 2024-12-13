@@ -8,38 +8,40 @@ class RegistrarController extends BaseController {
 
 
 
-    private function fetchStudentsByStatus($isActive) {
-        $stmt = $this->db->prepare("
-            SELECT
-            u.user_id AS id,
-            DATE_FORMAT(u.created_at, '%m/%d/%Y') AS date_register,
-            p.sex,
-            p.photo_path,
-            COALESCE(p.first_name, '') AS first_name,
-            COALESCE(p.last_name, '') AS last_name,
-            COALESCE(p.middle_name, '') AS middle_name,
-            DATE_FORMAT(p.birth_date, '%m/%d/%Y') AS birth_date,
-            COALESCE(p.house_street_sitio_purok, '') AS house_street_sitio_purok,
-            COALESCE(p.barangay, '') AS barangay,
-            COALESCE(p.municipality_city, '') AS municipality_city,
-            COALESCE(p.province, '') AS province,
-            COALESCE(p.contact_number, '') AS contact_number
-            FROM users u
-            LEFT JOIN profiles p ON u.user_id = p.profile_id
-            WHERE 
-            u.role_id = 4
-            AND u.isActive = :isActive
-            AND u.isDelete = 0
-            ORDER BY
-            u.created_at ASC
-            ");
-        $stmt->bindParam(':isActive', $isActive, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+private function fetchStudentsByStatus($isActive) {
+    $stmt = $this->db->prepare("
+        SELECT
+        u.username as username,
+        u.user_id AS id,
+        DATE_FORMAT(u.created_at, '%m/%d/%Y') AS date_register,
+        p.sex,
+        p.photo_path,
+        COALESCE(p.first_name, '') AS first_name,
+        COALESCE(p.last_name, '') AS last_name,
+        COALESCE(p.middle_name, '') AS middle_name,
+        DATE_FORMAT(p.birth_date, '%m/%d/%Y') AS birth_date,
+        COALESCE(p.house_street_sitio_purok, '') AS house_street_sitio_purok,
+        COALESCE(p.barangay, '') AS barangay,
+        COALESCE(p.municipality_city, '') AS municipality_city,
+        COALESCE(p.province, '') AS province,
+        COALESCE(p.contact_number, '') AS contact_number
+        FROM users u
+        LEFT JOIN profiles p ON u.user_id = p.profile_id
+        WHERE 
+        u.role_id = 4
+        AND u.isActive = :isActive
+        AND u.isDelete = 0
+        AND (p.first_name IS NOT NULL OR p.last_name IS NOT NULL OR p.birth_date IS NOT NULL)  -- Only include users with profile data
+        ORDER BY
+        u.created_at ASC
+    ");
+    $stmt->bindParam(':isActive', $isActive, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-    public function show() {
-        try {
+public function show() {
+    try {
         // Fetch students based on their status
         $pending_students = $this->fetchStudentsByStatus(0); // Pending (isActive = 0)
         $accepted_students = $this->fetchStudentsByStatus(1); // Accepted (isActive = 1)

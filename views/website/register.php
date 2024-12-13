@@ -34,6 +34,60 @@ if (isset($_SESSION['info'])) {
 if (isset($_SESSION['success'])) {
     displayToastMessage('success', 'bg-success', 'Success');
 }
+
+if (isset($_SESSION['Register_code'])) {
+    $message = $_SESSION['Register_code'];
+    unset($_SESSION['Register_code']);
+
+    echo "
+    <script src='https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js'></script>
+    <script type='text/javascript'>
+        $(window).on('load', function() {
+            $('#modal-sm').modal('show');
+            // Generate the QR code
+            QRCode.toCanvas(document.getElementById('qrcode'), '$message', {
+                width: 150,
+                margin: 2
+            }, function (error) {
+                if (error) console.error(error);
+            });
+        });
+    </script>
+
+    <div class='modal fade' id='modal-sm'>
+        <div class='modal-dialog modal-sm'>
+          <div class='modal-content'>
+            <div class='modal-header'>
+              <h4 class='modal-title'>Registration Ticket</h4>
+              <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                <span aria-hidden='true'>&times;</span>
+              </button>
+            </div>
+            <div class='modal-body text-center'> <!-- Center the content -->
+             
+              <div class='d-flex justify-content-center'>
+                <canvas id='qrcode'></canvas> <!-- QR Code will be rendered here -->
+
+              </div>
+              <br>
+               <p>Registration Code: <strong>$message</strong></p>
+              <p>Please save this QR code and present it to the registrar.</p>
+            </div>
+            <div class='modal-footer justify-content-between'>
+              <button type='button' class='btn btn-default' data-dismiss='modal'>Close</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    ";
+}
+
+
+
+
+
+
+
 ?>
 
 <div class="row">
@@ -49,7 +103,7 @@ if (isset($_SESSION['success'])) {
             <div class="col-md-6">
               <div class="form-group">
                 <label for="photo_path">Profile Photo</label>
-                <input type="file" class="form-control" id="photo_path" name="photo_path" required>
+                <input type="file" class="form-control" id="photo_path" name="photo_path"  accept="image/png, image/gif, image/jpeg" >
               </div>
             </div>
             <!-- Profile ID -->
@@ -85,8 +139,8 @@ if (isset($_SESSION['success'])) {
                 <label for="sex">Sex</label>
                 <select class="form-control" id="sex" name="sex" required>
                   <option selected disabled>Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
                 </select>
               </div>
             </div>

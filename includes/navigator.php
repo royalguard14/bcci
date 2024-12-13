@@ -36,8 +36,13 @@ $(document).ready(function() {
             method: 'GET', // You can also use POST if needed
             dataType: 'json',
             success: function(response) {
-                // Update the badge with the count
-                $('span.badge-info.right').text(response.count);
+                const badge = $('span.badge-info.right');
+                
+                if (response.count === 0) {
+                    badge.hide(); // Hide the badge if the count is 0
+                } else {
+                    badge.text(response.count).show(); // Update and show the badge if the count is not 0
+                }
             },
             error: function() {
                 console.error('Failed to fetch pending student count.');
@@ -51,6 +56,7 @@ $(document).ready(function() {
     // Optionally, call the function immediately when the page loads
     updatePendingStudentCount();
 });
+
 </script>
 
   <?php endif; ?>

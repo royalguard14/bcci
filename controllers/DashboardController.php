@@ -226,7 +226,8 @@ public function adviserDashboard() {
    
     private function studentDashboard() {
       
-        include 'views/dashboard/student_dashboard.php';
+          header("Location: home");
+        exit();
     }
 
     private function registrarDashboard() {
@@ -248,21 +249,20 @@ public function adviserDashboard() {
 
     public function showDashboard() {
         $userRole = $_SESSION['role_id'];
-        include 'views/dashboard/default_dashboard.php';
-        // switch ($userRole) {
-        //     case 2: // Faculty
-        //     $this->adviserDashboard();
-        //     break;
-        //     case 3: //Learners
-        //     $this->studentDashboard();
-        //     break;
-        //     case 4: //Registrar
-        //     $this->registrarDashboard();
-        //     break;
-        //     default://Parents
-        //     $this->defaultDashboard();
-        //     break;
-        // }
+        switch ($userRole) {
+            case 3: // Faculty
+            $this->adviserDashboard();
+            break;
+            case 4: //Learners
+            $this->studentDashboard();
+            break;
+            case 2: //Registrar
+            $this->registrarDashboard();
+            break;
+            default://Parents
+            $this->defaultDashboard();
+            break;
+        }
     }
 
 

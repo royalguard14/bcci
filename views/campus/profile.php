@@ -150,6 +150,21 @@ if (isset($_SESSION['success'])) {
       </div>
       </div>
 
+<?php elseif ($info['id'] == 7): ?>
+<!-- If ID is 7, show a switch for enrollment status -->
+<div class="form-check form-switch">
+  <!-- Hidden input to ensure '0' is submitted when unchecked -->
+  <input type="hidden" name="campus_info[<?= $info['id']; ?>]" value="0">
+  
+  <!-- Checkbox for enrollment status -->
+  <input type="checkbox" class="form-check-input" 
+         name="campus_info[<?= $info['id']; ?>]" 
+         id="campus-info-<?= $info['id']; ?>" 
+         value="1" <?= ($info['function'] == '1') ? 'checked' : ''; ?>>
+  <label class="form-check-label" for="campus-info-<?= $info['id']; ?>">
+    <?= ($info['function'] == '1') ? 'Active' : 'Inactive'; ?>
+  </label>
+</div>
 
     <?php else: ?>
       <!-- Default input for other IDs -->

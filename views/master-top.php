@@ -1,7 +1,10 @@
 <?php 
 // Get the current page from the URL
 $current_page = basename($_SERVER['REQUEST_URI'], ".php");
+
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +20,10 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
   <!-- jQuery -->
   <script src="assets/plugins/jquery/jquery.min.js"></script>
 
+    <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="assets/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 <style type="text/css">
@@ -64,6 +71,8 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
 
 </head>
 <body class="hold-transition layout-top-nav layout-footer-fixed">
+
+
   <div class="wrapper">
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
@@ -88,31 +97,50 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
           <!-- SEARCH FORM -->
         </div>
         <!-- Right navbar links -->
-        <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-   
+      <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+    <!-- Home Link -->
+    <li class="nav-item">
+        <a href="home" class="nav-link <?= ($current_page == 'home') ? 'active' : ''; ?>">Home</a>
+    </li>
 
+    <!-- Contact Us Link -->
+    <li class="nav-item">
+        <a href="contact" class="nav-link <?= ($current_page == 'contact') ? 'active' : ''; ?>">Contact Us</a>
+    </li>
 
-
-
-             <li class="nav-item">
-              <a href="home" class="nav-link <?= ($current_page == 'home') ? 'active' : ''; ?> ">Home</a>
+    <?php if (!isset($_SESSION['log_in'])): ?>
+        <!-- Guest Links -->
+        <li class="nav-item">
+            <a href="register" class="nav-link <?= ($current_page == 'register') ? 'active' : ''; ?>">Enroll Now!</a>
+        </li>
+        <li class="nav-item">
+            <a href="login" class="nav-link <?= ($current_page == 'login') ? 'active' : ''; ?>">Login</a>
+        </li>
+    <?php else: ?>
+        <?php if ($this->acads_report <= 0): ?>
+            <!-- Academic Setup for Logged-in Users Without Records -->
+            <li class="nav-item">
+                <a href="acad_setting" class="nav-link <?= ($current_page == 'acad_setting') ? 'active' : ''; ?>">Academic Setup</a>
             </li>
-
-
-             <li class="nav-item">
-              <a href="contact" class="nav-link <?= ($current_page == 'contact') ? 'active' : ''; ?> ">Contact us</a>
+        <?php else: ?>
+       <?php if ($this->myEnrollmentStatus <= 0 && $this->campusDataEnrollmentStatus == 1): ?>
+            <li class="nav-item">
+                <a href="addsubject" class="nav-link <?= ($current_page == 'addsubject') ? 'active' : ''; ?>">Choose Subject</a>
             </li>
-
-
-
-             <li class="nav-item">
-              <a href="register" class="nav-link <?= ($current_page == 'register') ? 'active' : ''; ?> ">Register</a>
+          <?php endif; ?>
+            <li class="nav-item">
+                <a href="profile" class="nav-link <?= ($current_page == 'profile') ? 'active' : ''; ?>">My Profile</a>
             </li>
+         
+        <?php endif; ?>
 
+        <!-- Logout Link -->
+        <li class="nav-item">
+            <a href="logout" class="nav-link <?= ($current_page == 'logout') ? 'active' : ''; ?>">Logout</a>
+        </li>
+    <?php endif; ?>
+</ul>
 
-        
-        
-        </ul>
       </div>
     </nav>
     <!-- /.navbar -->
@@ -160,10 +188,13 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
   <script src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
   <script src="assets/plugins/jquery/jquery.min.js"></script>
   <script src="assets/js/widget.js"></script>
+   <script src="assets/js/qrcode.js"></script>
   <!-- Bootstrap 4 -->
   <script src="assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <!-- AdminLTE App -->
   <script src="assets/dist/js/adminlte.min.js"></script>
+  <!-- SweetAlert2 -->
+<script src="assets/plugins/sweetalert2/sweetalert2.min.js"></script>
  
 </body>
 </html>
