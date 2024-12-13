@@ -64,32 +64,31 @@ function getPreReqNames($preReqIds, $db) {
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Select Your Subjects</h3>
+
+                <div class="card-tools">
+             <button type="button" class="btn btn-block btn-outline-info btn-flat">Enroll Now!!!</button>
+                </div>
             </div>
             <div class="card-body">
-                <?php if (!empty($subjectsDetails)): ?>
+                <?php if (!empty($detailedSubjects)): ?>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Code</th>
                                 <th>Subject Name</th>
                                 <th>Unit</th>
-                                <th>Pre-requisite</th>
+                           
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($subjectsDetails as $subject): ?>
+                            <?php foreach ($detailedSubjects as $subject): ?>
 
                                 <tr class="schedule-row" data-schedule-id="<?= htmlspecialchars($subject['id']); ?>">
                                     <td class="subject-cell"><?= htmlspecialchars($subject['code']); ?></td>
                                     <td><?= htmlspecialchars($subject['name']); ?></td>
                                     <td><?= htmlspecialchars($subject['unit_lec'] + $subject['unit_lab']); ?></td>
-                                    <td>
-                                        <?php
-                                        $preReqNames = getPreReqNames($subject['pre_req'], $this->db);
-                                        echo htmlspecialchars($preReqNames == "None" ? '' : $preReqNames);
-                                        ?>
-                                    </td>
+                    
                                     <td>
                                         <div class="form-group">
                                             <!-- Single Dropdown for Batch Selection -->
@@ -126,8 +125,10 @@ function getPreReqNames($preReqIds, $db) {
 </div>
 
 <script type="text/javascript">
+// Define selectedSchedules globally so it's accessible throughout the script
+var selectedSchedules = {}; // Object to store selected schedule IDs by subject
+
 $(document).ready(function() {
-    var selectedSchedules = {}; // Object to store selected schedule IDs by subject
 
     // On batch selection, fetch schedules and trigger conflict check automatically
     $('.batch-select').change(function() {
@@ -223,8 +224,6 @@ $(document).ready(function() {
                                 $(`.list-group-item[data-schedule-id="${id}"]`).addClass('highlight-conflict');
                             });
                         });
-
-           
                     } 
                 },
                 error: function() {
@@ -235,10 +234,61 @@ $(document).ready(function() {
             alert("No schedules selected.");
         }
     }
+
+    // Handle "Enroll Now" button click
+ $('.btn-outline-info').click(function() {
+    var selectedSubjectIds = Object.keys(selectedSchedules); // Get all subject IDs
+    var selectedData = [];
+
+    // Gather schedule IDs for each subject
+    for (var subjectId in selectedSchedules) {
+        if (selectedSchedules[subjectId].length > 0) {
+            selectedData.push({
+                subjectId: subjectId,
+                scheduleIds: selectedSchedules[subjectId]
+            });
+        }
+    }
+
+
+
+    $.ajax({
+        url: 'enrollSubjects',  // Endpoint to process enrollment
+        type: 'POST',
+        data: {
+            enrollmentData: JSON.stringify(selectedData) // Send data as a string if necessary
+        },
+        success: function(response) {
+            var parsedResponse = JSON.parse(response);
+            if (parsedResponse.success) {
+Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Your work has been saved",
+  showConfirmButton: false,
+  timer: 1500
+}).then(function() {
+  // After 1500ms, redirect to home
+  window.location.href = './home';
+});
+            } else {
+                // Enrollment failed, show error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: response.error || 'Something went wrong!',
+                    footer: '<a href="#">Why do I have this issue?</a>'
+                });
+            }
+        }
+     
+    });
 });
 
+});
 
 </script>
+
 
 <?php
 $content = ob_get_clean();

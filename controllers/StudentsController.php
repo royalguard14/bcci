@@ -89,31 +89,33 @@ public function updatemycourse()
 
 
 
-public function addsubject()
-{
+
+
+public function addsubject() {
     if ($this->myEnrollmentStatus <= 0 && $this->campusDataEnrollmentStatus == 1) {
         $userId = $_SESSION['user_id']; // Get user ID from session
 
-        // Step 1: Fetch last enrollment
+        // Fetch last enrollment information
         $stmt = $this->db->prepare(
             "SELECT semester_id, course_id, academic_year_id 
-             FROM enrollment_history 
-             WHERE user_id = :user_id 
-             ORDER BY enrollment_date DESC 
-             LIMIT 1"
+            FROM enrollment_history 
+            WHERE user_id = :user_id 
+            ORDER BY enrollment_date DESC 
+            LIMIT 1"
         );
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
         $lastEnrollment = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$lastEnrollment) {
-            // No enrollment history, fetch first semester subjects
+            $_SESSION['lastSem'] = 1;
+            // Fetch subjects for the first semester if no enrollment history
             $stmt = $this->db->prepare(
                 "SELECT subject_ids 
-                 FROM semester 
-                 WHERE semester = 1 AND course_id = (
-                     SELECT c_id FROM academic_record WHERE user_id = :user_id
-                 )"
+                FROM semester 
+                WHERE semester = 1 AND course_id = (
+                    SELECT c_id FROM academic_record WHERE user_id = :user_id
+                )"
             );
             $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
             $stmt->execute();
@@ -127,14 +129,15 @@ public function addsubject()
 
             $subjectIds = explode(',', $firstSemesterData['subject_ids']);
         } else {
+            // Fetch subjects for the current semester based on the last enrollment
             $semesterId = $lastEnrollment['semester_id'];
+            $_SESSION['lastSem'] = $semesterId;
             $courseId = $lastEnrollment['course_id'];
 
-            // Fetch current semester subjects
             $stmt = $this->db->prepare(
                 "SELECT subject_ids 
-                 FROM semester 
-                 WHERE id = :semester_id AND course_id = :course_id"
+                FROM semester 
+                WHERE id = :semester_id AND course_id = :course_id"
             );
             $stmt->bindParam(':semester_id', $semesterId, PDO::PARAM_INT);
             $stmt->bindParam(':course_id', $courseId, PDO::PARAM_INT);
@@ -150,44 +153,55 @@ public function addsubject()
             $subjectIds = explode(',', $semesterData['subject_ids']);
         }
 
-        $failedSubjects = [];
-        $schedules = [];
-
+        // Step 2: Check prerequisites and construct final subject list
+        $subjectsToOffer = [];
         foreach ($subjectIds as $subjectId) {
-            // Fetch prerequisite data
-            $stmt = $this->db->prepare(
-                "SELECT pre_req 
-                 FROM subjects 
-                 WHERE id = :subject_id"
-            );
+            $stmt = $this->db->prepare("SELECT pre_req FROM subjects WHERE id = :subject_id");
             $stmt->bindParam(':subject_id', $subjectId, PDO::PARAM_INT);
             $stmt->execute();
             $subjectData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$subjectData) {
-                continue; // Skip if subject data is not found
-            }
+            if ($subjectData && !empty($subjectData['pre_req'])) {
+                $preReqIds = explode(',', $subjectData['pre_req']); // Handle multiple prerequisites
+                $allPreReqsPassed = true;
 
-            $preReqNames = explode(',', $subjectData['pre_req']);
-            $allPreReqsPassed = true;
+                foreach ($preReqIds as $preReqId) {
+                    $stmt = $this->db->prepare(
+                        "SELECT grade FROM grade_records 
+                        WHERE user_id = :user_id AND subject_id = :pre_req_id"
+                    );
+                    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+                    $stmt->bindParam(':pre_req_id', $preReqId, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $gradeData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            foreach ($preReqNames as $preReqName) {
-                $stmt = $this->db->prepare(
-                    "SELECT grade 
-                     FROM grade_records 
-                     WHERE user_id = :user_id AND subject_id = (
-                         SELECT id FROM subjects WHERE id = :pre_req_name
-                     )"
-                );
-                $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-                $stmt->bindParam(':pre_req_name', $preReqName, PDO::PARAM_STR);
-                $stmt->execute();
-                $preReqGradeData = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if (!$preReqGradeData || $preReqGradeData['grade'] < 60) {
-                    $allPreReqsPassed = false;
-                    break;
+                    if (!$gradeData || $gradeData['grade'] < 75) {
+                        $allPreReqsPassed = false;
+                        break;
+                    }
                 }
+
+                if ($allPreReqsPassed) {
+                    $subjectsToOffer[] = $subjectId;
+                } else {
+                    $subjectsToOffer = array_merge($subjectsToOffer, $preReqIds); // Include missing prerequisites
+                }
+            } else {
+                $subjectsToOffer[] = $subjectId;
+            }
+        }
+
+        // Step 3: Fetch details for all unique subjects to offer
+        $subjectsToOffer = array_unique($subjectsToOffer);
+        $detailedSubjects = [];
+        foreach ($subjectsToOffer as $subjectId) {
+            $stmt = $this->db->prepare("SELECT * FROM subjects WHERE id = :subject_id");
+            $stmt->bindParam(':subject_id', $subjectId, PDO::PARAM_INT);
+            $stmt->execute();
+            $subjectDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($subjectDetails) {
+                $detailedSubjects[] = $subjectDetails;
             }
 
             // Fetch schedules for the subject
@@ -215,26 +229,9 @@ public function addsubject()
             if ($batches) {
                 $schedules[$subjectId] = $batches;
             }
-
-            if (!$allPreReqsPassed) {
-                $failedSubjects[] = $subjectId;
-                continue;
-            }
         }
 
-        // Fetch detailed subject data for failed subjects
-        $subjectsDetails = [];
-        foreach ($failedSubjects as $subjectId) {
-            $stmt = $this->db->prepare("SELECT * FROM subjects WHERE id = :subject_id");
-            $stmt->bindParam(':subject_id', $subjectId, PDO::PARAM_INT);
-            $stmt->execute();
-            $subject = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($subject) {
-                $subjectsDetails[] = $subject;
-            }
-        }
-
+        // Display all detailed subjects in the view
         include 'views/student/addsubject.php';
     } else {
         $_SESSION['error_message'] = "Unauthorized access.";
@@ -242,6 +239,8 @@ public function addsubject()
         exit();
     }
 }
+
+
 
 
 public function getSubjs() {
@@ -261,51 +260,6 @@ public function getSubjs() {
         echo json_encode($schedules);
     }
 }
-
-// public function checkScheduleConflict() {
-//     // Get the schedule IDs from the AJAX request
-//     $schedule_ids = isset($_POST['schedule_ids']) ? $_POST['schedule_ids'] : [];
-
-//     // Check if there are selected schedules
-//     if (!empty($schedule_ids)) {
-//         // Convert the schedule IDs into a comma-separated string
-//         $schedule_ids_str = implode(',', array_map('intval', $schedule_ids)); // Ensure values are integers for security
-
-//         try {
-//             // Query to check for conflicts based on the same day and time_slot
-//             $stmt = $this->db->prepare("
-//                 SELECT GROUP_CONCAT(id) as conflict_ids, day, time_slot
-//                 FROM schedules
-//                 WHERE id IN ($schedule_ids_str)
-//                 GROUP BY day, time_slot
-//                 HAVING COUNT(*) > 1
-//             ");
-//             $stmt->execute();
-//             $conflicts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-//             if ($conflicts) {
-//                 // Build detailed conflict data
-//                 $response = [
-//                     'conflict' => true,
-//                     'details' => $conflicts
-//                 ];
-//             } else {
-//                 $response = ['conflict' => false];
-//             }
-//         } catch (Exception $e) {
-//             // Handle error
-//             $response = ['error' => 'Database error: ' . $e->getMessage()];
-//         }
-//     } else {
-//         $response = ['error' => 'No schedule IDs provided.'];
-//     }
-
-//     // Send response as JSON
-//     header('Content-Type: application/json');
-//     echo json_encode($response);
-// }
-
-
 
 
 
@@ -375,9 +329,63 @@ public function checkScheduleConflict() {
 
 
 
+public function enrollSubjects() {
+    // Assuming you have a PDO connection to your database
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        
+        // Decode the enrollment data from the POST request
+        $selectedData = json_decode($_POST['enrollmentData'], true); // Decode the JSON string
 
+        // Check if the data is valid
+        if (empty($selectedData)) {
+            $_SESSION['error'] = "No subjects selected.";
+            header("Location: home");
+            exit();
+        }
 
+        $user_id = $_SESSION['user_id'];  // The logged-in user's ID
+        $course_id = $this->mycourseID;  // The course the user is enrolling in
+        $semester_id = $_SESSION['lastSem'];  // The current semester ID
+        $academic_year_id = $this->campusDataCurrentAcademicYear;  // The academic year
+        $status = 'Evaluation';  // Enrollment status (e.g., Pending, Completed)
 
+        // Convert the selected subjects and their schedules into a JSON-encoded string for storage
+        $subjects_taken = json_encode($selectedData);
+
+        // SQL query to insert the enrollment data
+        $query = "
+            INSERT INTO enrollment_history (user_id, course_id, semester_id, subjects_taken, status, academic_year_id, enrollment_date) 
+            VALUES (:user_id, :course_id, :semester_id, :subjects_taken, :status, :academic_year_id, NOW())
+        ";
+
+        // Prepare the statement
+        $stmt = $this->db->prepare($query);
+
+        // Bind parameters to the SQL query
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':course_id', $course_id);
+        $stmt->bindParam(':semester_id', $semester_id);
+        $stmt->bindParam(':subjects_taken', $subjects_taken);
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':academic_year_id', $academic_year_id);
+
+         // Execute the statement
+        if ($stmt->execute()) {
+            // If successful, return a JSON response indicating success
+            echo json_encode(['success' => true]);
+             
+        } else {
+            // If an error occurs, return a JSON response with an error message
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error during enrollment.'
+            ]);
+        }
+
+        exit(); 
+        
+    }
+}
 
 
 

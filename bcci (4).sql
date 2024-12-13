@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 12, 2024 at 04:35 AM
+-- Generation Time: Dec 13, 2024 at 02:21 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.0
 
@@ -30,8 +30,16 @@ SET time_zone = "+00:00";
 CREATE TABLE `academic_record` (
   `id` int(11) NOT NULL,
   `c_id` int(11) NOT NULL,
-  `status` varchar(50) NOT NULL
+  `status` varchar(50) DEFAULT NULL,
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `academic_record`
+--
+
+INSERT INTO `academic_record` (`id`, `c_id`, `status`, `user_id`) VALUES
+(6, 1, NULL, 8);
 
 -- --------------------------------------------------------
 
@@ -91,7 +99,8 @@ INSERT INTO `campus_info` (`id`, `name`, `function`) VALUES
 (3, 'Operating Day', 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'),
 (4, 'Operating Time', '6:00AM-9:00PM'),
 (5, 'Academic Year', '1'),
-(6, 'Institutional Email', 'bxucity.edu.ph');
+(6, 'Institutional Email', 'bxucity.edu.ph'),
+(7, 'Enrollment', '1');
 
 -- --------------------------------------------------------
 
@@ -127,8 +136,7 @@ CREATE TABLE `enrollment_history` (
   `user_id` int(11) DEFAULT NULL,
   `course_id` int(11) NOT NULL,
   `semester_id` int(11) NOT NULL,
-  `section_id` int(11) DEFAULT NULL,
-  `adviser_id` int(11) NOT NULL,
+  `subjects_taken` varchar(500) NOT NULL,
   `status` varchar(30) NOT NULL,
   `academic_year_id` int(11) DEFAULT NULL,
   `enrollment_date` date DEFAULT NULL
@@ -145,7 +153,6 @@ CREATE TABLE `grade_records` (
   `user_id` int(11) NOT NULL,
   `eh_id` int(11) NOT NULL,
   `subject_id` int(11) NOT NULL,
-  `grading_id` int(11) NOT NULL,
   `grade` decimal(5,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -218,6 +225,14 @@ CREATE TABLE `profiles` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `profiles`
+--
+
+INSERT INTO `profiles` (`id`, `photo_path`, `profile_id`, `last_name`, `first_name`, `middle_name`, `sex`, `birth_date`, `house_street_sitio_purok`, `barangay`, `municipality_city`, `province`, `contact_number`, `created_at`) VALUES
+(1, 'assets/documents/43614647/bautista.jpg', 8, 'bautista', 'Ghaizar', 'Atara', 'M', '1993-10-13', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-12 03:40:44'),
+(2, 'assets/documents/13917692/photo_6244355151410348798_y.jpg', 9, 'bautistaa', 'Ghaizar', 'Atara', 'M', '1993-10-16', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-12 06:59:04');
+
 -- --------------------------------------------------------
 
 --
@@ -280,188 +295,268 @@ CREATE TABLE `schedules` (
   `day` varchar(20) NOT NULL,
   `time_slot` varchar(20) NOT NULL,
   `session_type` enum('Lecture','Lab') NOT NULL,
-  `adviser` int(11) DEFAULT NULL
+  `adviser` int(11) DEFAULT NULL,
+  `batch` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `schedules`
 --
 
-INSERT INTO `schedules` (`id`, `academic_id`, `course_id`, `semester`, `subject_id`, `day`, `time_slot`, `session_type`, `adviser`) VALUES
-(1, 1, 1, '1', 1, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL),
-(2, 1, 1, '1', 1, 'Thursday', '10:30AM-12:00PM', 'Lecture', NULL),
-(3, 1, 1, '1', 2, 'Thursday', '03:00PM-04:30PM', 'Lecture', NULL),
-(4, 1, 1, '1', 2, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL),
-(5, 1, 1, '1', 3, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL),
-(6, 1, 1, '1', 3, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(7, 1, 1, '1', 4, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL),
-(8, 1, 1, '1', 4, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL),
-(9, 1, 1, '1', 5, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL),
-(10, 1, 1, '1', 5, 'Wednesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(11, 1, 1, '1', 34, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL),
-(12, 1, 1, '1', 34, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL),
-(13, 1, 1, '1', 38, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(14, 1, 1, '1', 38, 'Wednesday', '01:30PM-03:00PM', 'Lecture', NULL),
-(15, 1, 1, '1', 132, 'Saturday', '09:00AM-10:30AM', 'Lecture', NULL),
-(16, 1, 1, '1', 132, 'Friday', '06:00AM-07:30AM', 'Lecture', NULL),
-(17, 1, 1, '2', 6, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL),
-(18, 1, 1, '2', 6, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL),
-(19, 1, 1, '2', 7, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(20, 1, 1, '2', 7, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL),
-(21, 1, 1, '2', 8, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL),
-(22, 1, 1, '2', 8, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL),
-(23, 1, 1, '2', 9, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL),
-(24, 1, 1, '2', 9, 'Thursday', '03:00PM-04:30PM', 'Lecture', NULL),
-(25, 1, 1, '2', 10, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL),
-(26, 1, 1, '2', 10, 'Wednesday', '03:00PM-04:30PM', 'Lecture', NULL),
-(27, 1, 1, '2', 11, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL),
-(28, 1, 1, '2', 11, 'Wednesday', '07:30PM-09:00PM', 'Lecture', NULL),
-(29, 1, 1, '2', 12, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL),
-(30, 1, 1, '2', 12, 'Monday', '07:30PM-09:00PM', 'Lecture', NULL),
-(31, 1, 1, '3', 14, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(32, 1, 1, '3', 14, 'Wednesday', '01:30PM-03:00PM', 'Lecture', NULL),
-(33, 1, 1, '3', 15, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL),
-(34, 1, 1, '3', 15, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL),
-(35, 1, 1, '3', 16, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL),
-(36, 1, 1, '3', 16, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL),
-(37, 1, 1, '3', 17, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL),
-(38, 1, 1, '3', 17, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL),
-(39, 1, 1, '3', 18, 'Friday', '12:00PM-01:30PM', 'Lecture', NULL),
-(40, 1, 1, '3', 18, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL),
-(41, 1, 1, '3', 19, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL),
-(42, 1, 1, '3', 19, 'Monday', '06:00PM-07:30PM', 'Lecture', NULL),
-(43, 1, 1, '3', 20, 'Thursday', '07:30PM-09:00PM', 'Lecture', NULL),
-(44, 1, 1, '3', 20, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL),
-(45, 1, 1, '4', 21, 'Friday', '07:30PM-09:00PM', 'Lecture', NULL),
-(46, 1, 1, '4', 21, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL),
-(47, 1, 1, '4', 22, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL),
-(48, 1, 1, '4', 22, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL),
-(49, 1, 1, '4', 23, 'Friday', '06:00AM-07:30AM', 'Lecture', NULL),
-(50, 1, 1, '4', 23, 'Friday', '03:00PM-04:30PM', 'Lecture', NULL),
-(51, 1, 1, '4', 24, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL),
-(52, 1, 1, '4', 24, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL),
-(53, 1, 1, '4', 25, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL),
-(54, 1, 1, '4', 25, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL),
-(55, 1, 2, '1', 1, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL),
-(56, 1, 2, '1', 1, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL),
-(57, 1, 2, '1', 2, 'Monday', '07:30PM-09:00PM', 'Lecture', NULL),
-(58, 1, 2, '1', 2, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL),
-(59, 1, 2, '1', 3, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL),
-(60, 1, 2, '1', 3, 'Friday', '06:00AM-07:30AM', 'Lecture', NULL),
-(61, 1, 2, '1', 4, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL),
-(62, 1, 2, '1', 4, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(63, 1, 2, '1', 34, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL),
-(64, 1, 2, '1', 34, 'Friday', '07:30PM-09:00PM', 'Lecture', NULL),
-(65, 1, 2, '1', 35, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL),
-(66, 1, 2, '1', 35, 'Wednesday', '07:30PM-09:00PM', 'Lecture', NULL),
-(67, 1, 2, '1', 36, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL),
-(68, 1, 2, '1', 36, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL),
-(69, 1, 2, '1', 37, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL),
-(70, 1, 2, '1', 37, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL),
-(71, 1, 2, '1', 38, 'Friday', '12:00PM-01:30PM', 'Lecture', NULL),
-(72, 1, 2, '1', 38, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL),
-(73, 1, 2, '1', 132, 'Wednesday', '01:30PM-03:00PM', 'Lecture', NULL),
-(74, 1, 2, '1', 132, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL),
-(75, 1, 2, '2', 6, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL),
-(76, 1, 2, '2', 6, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL),
-(77, 1, 2, '2', 7, 'Monday', '07:30PM-09:00PM', 'Lecture', NULL),
-(78, 1, 2, '2', 7, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL),
-(79, 1, 2, '2', 8, 'Friday', '07:30PM-09:00PM', 'Lecture', NULL),
-(80, 1, 2, '2', 8, 'Tuesday', '03:00PM-04:30PM', 'Lecture', NULL),
-(81, 1, 2, '2', 10, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL),
-(82, 1, 2, '2', 10, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL),
-(83, 1, 2, '2', 12, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL),
-(84, 1, 2, '2', 12, 'Monday', '06:00PM-07:30PM', 'Lecture', NULL),
-(85, 1, 2, '2', 40, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL),
-(86, 1, 2, '2', 40, 'Friday', '06:00AM-07:30AM', 'Lecture', NULL),
-(87, 1, 2, '2', 41, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(88, 1, 2, '2', 41, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL),
-(89, 1, 1, '1', 1, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL),
-(90, 1, 1, '1', 1, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL),
-(91, 1, 1, '1', 2, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL),
-(92, 1, 1, '1', 2, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL),
-(93, 1, 1, '1', 3, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(94, 1, 1, '1', 3, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL),
-(95, 1, 1, '1', 4, 'Wednesday', '07:30AM-09:00AM', 'Lecture', NULL),
-(96, 1, 1, '1', 5, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL),
-(97, 1, 1, '1', 5, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL),
-(98, 1, 1, '1', 34, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL),
-(99, 1, 1, '1', 34, 'Wednesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(100, 1, 1, '1', 38, 'Friday', '09:00AM-10:30AM', 'Lecture', NULL),
-(101, 1, 1, '1', 38, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL),
-(102, 1, 1, '1', 132, 'Monday', '12:00PM-01:30PM', 'Lecture', NULL),
-(103, 1, 1, '1', 132, 'Saturday', '06:00PM-07:30PM', 'Lecture', NULL),
-(104, 1, 1, '2', 6, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL),
-(105, 1, 1, '2', 6, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL),
-(106, 1, 1, '2', 7, 'Friday', '09:00AM-10:30AM', 'Lecture', NULL),
-(107, 1, 1, '2', 7, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL),
-(108, 1, 1, '2', 8, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL),
-(109, 1, 1, '2', 8, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL),
-(110, 1, 1, '2', 9, 'Wednesday', '07:30AM-09:00AM', 'Lecture', NULL),
-(111, 1, 1, '2', 9, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL),
-(112, 1, 1, '2', 10, 'Thursday', '10:30AM-12:00PM', 'Lecture', NULL),
-(113, 1, 1, '2', 10, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL),
-(114, 1, 1, '2', 11, 'Monday', '12:00PM-01:30PM', 'Lecture', NULL),
-(115, 1, 1, '2', 11, 'Friday', '07:30PM-09:00PM', 'Lecture', NULL),
-(116, 1, 1, '2', 12, 'Wednesday', '07:30PM-09:00PM', 'Lecture', NULL),
-(117, 1, 1, '2', 12, 'Friday', '06:00AM-07:30AM', 'Lecture', NULL),
-(118, 1, 1, '3', 14, 'Monday', '12:00PM-01:30PM', 'Lecture', NULL),
-(119, 1, 1, '3', 14, 'Friday', '06:00AM-07:30AM', 'Lecture', NULL),
-(120, 1, 1, '3', 15, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL),
-(121, 1, 1, '3', 15, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL),
-(122, 1, 1, '3', 16, 'Monday', '06:00PM-07:30PM', 'Lecture', NULL),
-(123, 1, 1, '3', 17, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL),
-(124, 1, 1, '3', 17, 'Saturday', '09:00AM-10:30AM', 'Lecture', NULL),
-(125, 1, 1, '3', 18, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL),
-(126, 1, 1, '3', 18, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL),
-(127, 1, 1, '3', 19, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(128, 1, 1, '3', 19, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(129, 1, 1, '3', 20, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL),
-(130, 1, 1, '3', 20, 'Friday', '12:00PM-01:30PM', 'Lecture', NULL),
-(131, 1, 1, '4', 21, 'Friday', '03:00PM-04:30PM', 'Lecture', NULL),
-(132, 1, 1, '4', 21, 'Monday', '07:30PM-09:00PM', 'Lecture', NULL),
-(133, 1, 1, '4', 22, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL),
-(134, 1, 1, '4', 22, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL),
-(135, 1, 1, '4', 23, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL),
-(136, 1, 1, '4', 23, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL),
-(137, 1, 1, '4', 24, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL),
-(138, 1, 1, '4', 24, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL),
-(139, 1, 1, '4', 25, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(140, 1, 1, '4', 25, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL),
-(141, 1, 2, '1', 1, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(142, 1, 2, '1', 1, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL),
-(143, 1, 2, '1', 2, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL),
-(144, 1, 2, '1', 2, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL),
-(145, 1, 2, '1', 3, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(146, 1, 2, '1', 3, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL),
-(147, 1, 2, '1', 4, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL),
-(148, 1, 2, '1', 4, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL),
-(149, 1, 2, '1', 34, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL),
-(150, 1, 2, '1', 34, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL),
-(151, 1, 2, '1', 35, 'Thursday', '12:00PM-01:30PM', 'Lecture', NULL),
-(152, 1, 2, '1', 35, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL),
-(153, 1, 2, '1', 36, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL),
-(154, 1, 2, '1', 36, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL),
-(155, 1, 2, '1', 37, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL),
-(156, 1, 2, '1', 37, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL),
-(157, 1, 2, '1', 38, 'Thursday', '03:00PM-04:30PM', 'Lecture', NULL),
-(158, 1, 2, '1', 38, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL),
-(159, 1, 2, '1', 132, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL),
-(160, 1, 2, '1', 132, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL),
-(161, 1, 2, '2', 6, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL),
-(162, 1, 2, '2', 6, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL),
-(163, 1, 2, '2', 7, 'Monday', '06:00PM-07:30PM', 'Lecture', NULL),
-(164, 1, 2, '2', 7, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL),
-(165, 1, 2, '2', 8, 'Wednesday', '04:30PM-06:00PM', 'Lecture', NULL),
-(166, 1, 2, '2', 8, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL),
-(167, 1, 2, '2', 10, 'Thursday', '03:00PM-04:30PM', 'Lecture', NULL),
-(168, 1, 2, '2', 10, 'Wednesday', '01:30PM-03:00PM', 'Lecture', NULL),
-(169, 1, 2, '2', 12, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL),
-(170, 1, 2, '2', 12, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL),
-(171, 1, 2, '2', 40, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL),
-(172, 1, 2, '2', 40, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL),
-(173, 1, 2, '2', 41, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL),
-(174, 1, 2, '2', 41, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL);
+INSERT INTO `schedules` (`id`, `academic_id`, `course_id`, `semester`, `subject_id`, `day`, `time_slot`, `session_type`, `adviser`, `batch`) VALUES
+(1, 1, 1, '1', 1, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(2, 1, 1, '1', 1, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(3, 1, 1, '1', 2, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
+(4, 1, 1, '1', 2, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(5, 1, 1, '1', 3, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(6, 1, 1, '1', 3, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL, 1),
+(7, 1, 1, '1', 4, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
+(8, 1, 1, '1', 4, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(9, 1, 1, '1', 5, 'Friday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(10, 1, 1, '1', 5, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(11, 1, 1, '1', 34, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(12, 1, 1, '1', 34, 'Wednesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(13, 1, 1, '1', 38, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
+(14, 1, 1, '1', 38, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL, 1),
+(15, 1, 1, '1', 132, 'Thursday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(16, 1, 1, '1', 132, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(17, 1, 1, '2', 6, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(18, 1, 1, '2', 6, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(19, 1, 1, '2', 7, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(20, 1, 1, '2', 7, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
+(21, 1, 1, '2', 8, 'Thursday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(22, 1, 1, '2', 8, 'Wednesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(23, 1, 1, '2', 9, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(24, 1, 1, '2', 9, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(25, 1, 1, '2', 10, 'Saturday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
+(26, 1, 1, '2', 10, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
+(27, 1, 1, '2', 11, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
+(28, 1, 1, '2', 11, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(29, 1, 1, '2', 12, 'Thursday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(30, 1, 1, '2', 12, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(31, 1, 1, '3', 14, 'Thursday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(32, 1, 1, '3', 14, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL, 1),
+(33, 1, 1, '3', 15, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(34, 1, 1, '3', 15, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(35, 1, 1, '3', 16, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(36, 1, 1, '3', 16, 'Monday', '07:30PM-09:00PM', 'Lecture', NULL, 1),
+(37, 1, 1, '3', 17, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL, 1),
+(38, 1, 1, '3', 17, 'Tuesday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(39, 1, 1, '3', 18, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL, 1),
+(40, 1, 1, '3', 18, 'Tuesday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(41, 1, 1, '3', 19, 'Wednesday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(42, 1, 1, '3', 19, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
+(43, 1, 1, '3', 20, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(44, 1, 1, '3', 20, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
+(45, 1, 1, '4', 21, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL, 1),
+(46, 1, 1, '4', 21, 'Wednesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(47, 1, 1, '4', 22, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(48, 1, 1, '4', 22, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(49, 1, 1, '4', 23, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(50, 1, 1, '4', 23, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(51, 1, 1, '4', 24, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(52, 1, 1, '4', 24, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
+(53, 1, 1, '4', 25, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(54, 1, 1, '4', 25, 'Thursday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(55, 1, 2, '1', 1, 'Wednesday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
+(56, 1, 2, '1', 1, 'Thursday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(57, 1, 2, '1', 2, 'Monday', '07:30PM-09:00PM', 'Lecture', NULL, 1),
+(58, 1, 2, '1', 2, 'Monday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(59, 1, 2, '1', 3, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(60, 1, 2, '1', 3, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(61, 1, 2, '1', 4, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(62, 1, 2, '1', 4, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
+(63, 1, 2, '1', 34, 'Friday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(64, 1, 2, '1', 34, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(65, 1, 2, '1', 35, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(66, 1, 2, '1', 35, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(67, 1, 2, '1', 36, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(68, 1, 2, '1', 36, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(69, 1, 2, '1', 37, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(70, 1, 2, '1', 37, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL, 1),
+(71, 1, 2, '1', 38, 'Wednesday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(72, 1, 2, '1', 38, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL, 1),
+(73, 1, 2, '1', 132, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(74, 1, 2, '1', 132, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(75, 1, 2, '2', 6, 'Wednesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(76, 1, 2, '2', 6, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(77, 1, 2, '2', 7, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
+(78, 1, 2, '2', 7, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(79, 1, 2, '2', 8, 'Saturday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
+(80, 1, 2, '2', 8, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(81, 1, 2, '2', 10, 'Wednesday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(82, 1, 2, '2', 10, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(83, 1, 2, '2', 12, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(84, 1, 2, '2', 12, 'Monday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
+(85, 1, 2, '2', 40, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
+(86, 1, 2, '2', 40, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
+(87, 1, 2, '2', 41, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(88, 1, 2, '2', 41, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
+(89, 1, 1, '1', 1, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
+(90, 1, 1, '1', 1, 'Thursday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(91, 1, 1, '1', 2, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(92, 1, 1, '1', 3, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(93, 1, 1, '1', 4, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(94, 1, 1, '1', 4, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(95, 1, 1, '1', 5, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(96, 1, 1, '1', 5, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(97, 1, 1, '1', 34, 'Saturday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(98, 1, 1, '1', 34, 'Wednesday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
+(99, 1, 1, '1', 38, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(100, 1, 1, '1', 38, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(101, 1, 1, '1', 132, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(102, 1, 1, '1', 132, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(103, 1, 1, '2', 6, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(104, 1, 1, '2', 6, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(105, 1, 1, '2', 7, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(106, 1, 1, '2', 7, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
+(107, 1, 1, '2', 8, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(108, 1, 1, '2', 8, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(109, 1, 1, '2', 9, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
+(110, 1, 1, '2', 9, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(111, 1, 1, '2', 10, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(112, 1, 1, '2', 10, 'Wednesday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(113, 1, 1, '2', 11, 'Monday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(114, 1, 1, '2', 11, 'Thursday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
+(115, 1, 1, '2', 12, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(116, 1, 1, '2', 12, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(117, 1, 1, '3', 14, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
+(118, 1, 1, '3', 14, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(119, 1, 1, '3', 15, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(120, 1, 1, '3', 15, 'Tuesday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(121, 1, 1, '3', 16, 'Wednesday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(122, 1, 1, '3', 16, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(123, 1, 1, '3', 17, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(124, 1, 1, '3', 17, 'Wednesday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(125, 1, 1, '3', 18, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(126, 1, 1, '3', 18, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(127, 1, 1, '3', 19, 'Friday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(128, 1, 1, '3', 20, 'Thursday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
+(129, 1, 1, '3', 20, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(130, 1, 1, '4', 21, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(131, 1, 1, '4', 21, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(132, 1, 1, '4', 22, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
+(133, 1, 1, '4', 22, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(134, 1, 1, '4', 23, 'Thursday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(135, 1, 1, '4', 23, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(136, 1, 1, '4', 24, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(137, 1, 1, '4', 24, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(138, 1, 1, '4', 25, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(139, 1, 1, '4', 25, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(140, 1, 2, '1', 1, 'Saturday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(141, 1, 2, '1', 1, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(142, 1, 2, '1', 2, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
+(143, 1, 2, '1', 2, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(144, 1, 2, '1', 3, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(145, 1, 2, '1', 3, 'Tuesday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(146, 1, 2, '1', 4, 'Saturday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(147, 1, 2, '1', 4, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(148, 1, 2, '1', 34, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(149, 1, 2, '1', 34, 'Thursday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
+(150, 1, 2, '1', 35, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(151, 1, 2, '1', 36, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(152, 1, 2, '1', 36, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(153, 1, 2, '1', 37, 'Monday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(154, 1, 2, '1', 37, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(155, 1, 2, '1', 38, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
+(156, 1, 2, '1', 132, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(157, 1, 2, '1', 132, 'Wednesday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
+(158, 1, 2, '2', 6, 'Monday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(159, 1, 2, '2', 6, 'Monday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(160, 1, 2, '2', 7, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(161, 1, 2, '2', 7, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(162, 1, 2, '2', 8, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(163, 1, 2, '2', 8, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(164, 1, 2, '2', 10, 'Saturday', '06:00PM-07:30PM', 'Lecture', NULL, 2),
+(165, 1, 2, '2', 10, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(166, 1, 2, '2', 12, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(167, 1, 2, '2', 12, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(168, 1, 2, '2', 40, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(169, 1, 2, '2', 40, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(170, 1, 2, '2', 41, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(171, 1, 2, '2', 41, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
+(172, 1, 1, '1', 1, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL, 3),
+(173, 1, 1, '1', 1, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(174, 1, 1, '1', 2, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
+(175, 1, 1, '1', 2, 'Wednesday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
+(176, 1, 1, '1', 3, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(177, 1, 1, '1', 3, 'Tuesday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
+(178, 1, 1, '1', 4, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL, 3),
+(179, 1, 1, '1', 4, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(180, 1, 1, '1', 5, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL, 3),
+(181, 1, 1, '1', 5, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(182, 1, 1, '1', 34, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL, 3),
+(183, 1, 1, '1', 34, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL, 3),
+(184, 1, 1, '1', 38, 'Saturday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(185, 1, 1, '1', 38, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(186, 1, 1, '1', 132, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(187, 1, 1, '1', 132, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL, 3),
+(188, 1, 1, '2', 7, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(189, 1, 1, '2', 8, 'Friday', '07:30AM-09:00AM', 'Lecture', NULL, 3),
+(190, 1, 1, '2', 9, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(191, 1, 1, '2', 9, 'Thursday', '12:00PM-01:30PM', 'Lecture', NULL, 3),
+(192, 1, 1, '2', 10, 'Friday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(193, 1, 1, '2', 10, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(194, 1, 1, '2', 11, 'Saturday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(195, 1, 1, '2', 11, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(196, 1, 1, '2', 12, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL, 3),
+(197, 1, 1, '2', 12, 'Tuesday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(198, 1, 1, '3', 14, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(199, 1, 1, '3', 14, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(200, 1, 1, '3', 15, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(201, 1, 1, '3', 15, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(202, 1, 1, '3', 16, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL, 3),
+(203, 1, 1, '3', 16, 'Tuesday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(204, 1, 1, '3', 17, 'Friday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(205, 1, 1, '3', 17, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(206, 1, 1, '3', 18, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(207, 1, 1, '3', 18, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(208, 1, 1, '3', 19, 'Thursday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
+(209, 1, 1, '3', 19, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(210, 1, 1, '3', 20, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(211, 1, 1, '3', 20, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL, 3),
+(212, 1, 1, '4', 21, 'Friday', '07:30PM-09:00PM', 'Lecture', NULL, 3),
+(213, 1, 1, '4', 21, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(214, 1, 1, '4', 22, 'Monday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(215, 1, 1, '4', 22, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(216, 1, 1, '4', 23, 'Thursday', '07:30PM-09:00PM', 'Lecture', NULL, 3),
+(217, 1, 1, '4', 23, 'Thursday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(218, 1, 1, '4', 24, 'Tuesday', '03:00PM-04:30PM', 'Lecture', NULL, 3),
+(219, 1, 1, '4', 24, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(220, 1, 1, '4', 25, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(221, 1, 1, '4', 25, 'Saturday', '03:00PM-04:30PM', 'Lecture', NULL, 3),
+(222, 1, 2, '1', 1, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 3),
+(223, 1, 2, '1', 1, 'Friday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(224, 1, 2, '1', 2, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 3),
+(225, 1, 2, '1', 2, 'Tuesday', '03:00PM-04:30PM', 'Lecture', NULL, 3),
+(226, 1, 2, '1', 3, 'Wednesday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(227, 1, 2, '1', 3, 'Thursday', '07:30PM-09:00PM', 'Lecture', NULL, 3),
+(228, 1, 2, '1', 4, 'Tuesday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(229, 1, 2, '1', 4, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
+(230, 1, 2, '1', 34, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(231, 1, 2, '1', 34, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL, 3),
+(232, 1, 2, '1', 35, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(233, 1, 2, '1', 35, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(234, 1, 2, '1', 36, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(235, 1, 2, '1', 36, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(236, 1, 2, '1', 37, 'Thursday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(237, 1, 2, '1', 37, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL, 3),
+(238, 1, 2, '1', 38, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
+(239, 1, 2, '1', 38, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
+(240, 1, 2, '1', 132, 'Saturday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(241, 1, 2, '1', 132, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(242, 1, 2, '2', 6, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(243, 1, 2, '2', 6, 'Tuesday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(244, 1, 2, '2', 7, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL, 3),
+(245, 1, 2, '2', 7, 'Wednesday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
+(246, 1, 2, '2', 8, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(247, 1, 2, '2', 8, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL, 3),
+(248, 1, 2, '2', 10, 'Saturday', '12:00PM-01:30PM', 'Lecture', NULL, 3),
+(249, 1, 2, '2', 10, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL, 3),
+(250, 1, 2, '2', 12, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL, 3),
+(251, 1, 2, '2', 40, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL, 3),
+(252, 1, 2, '2', 40, 'Wednesday', '03:00PM-04:30PM', 'Lecture', NULL, 3),
+(253, 1, 2, '2', 41, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL, 3);
 
 -- --------------------------------------------------------
 
@@ -539,7 +634,7 @@ CREATE TABLE `subjects` (
 INSERT INTO `subjects` (`id`, `name`, `description`, `code`, `unit_lec`, `unit_lab`, `pre_req`) VALUES
 (1, 'Understanding the Self', '', 'GE 1', 3, 0, ''),
 (2, 'Reading in the Philippine History', '', 'GE 2', 3, 0, ''),
-(3, 'The Contemporary World', '', 'GE 3', 3, 0, ''),
+(3, 'The Contemporary World', '', 'GE 3', 3, 0, '9,10'),
 (4, 'Ang Kulikulum ng Filipino sa Batayang Antas ng Edukasyon', '', 'FIL 1', 3, 0, ''),
 (5, 'PATHFit 1: Movement Competency Training', '', 'PE 1', 3, 0, ''),
 (6, 'Purposive Communication', '', 'GE 5', 3, 0, ''),
@@ -734,7 +829,9 @@ INSERT INTO `users` (`user_id`, `email`, `username`, `password`, `role_id`, `isA
 (4, '', 'student1', '$2y$10$vpb/MIhDVc.Z0Jvm7oiji.dWvXGEWHuyykVCiGDKQ/6UF3s30mOEy', 4, 1, 0, NULL, '2024-12-02 00:39:27', '2024-12-12 03:34:57'),
 (5, '', 'student2', '$2y$10$.YGT/Bw6BL6V9TSiRXaQAebrUP.krIOcmeFT4FTUL1gE49JfbK9qO', 4, 1, 0, NULL, '2024-12-02 00:39:37', '2024-12-12 03:35:00'),
 (6, '', 'accounting', '$2y$10$Vz/U3mzfZ1QOD/WSAF44e.P8TcxpiFceauMioV8.3MuBsWly4Ynxq', 5, 1, 0, NULL, '2024-12-02 00:39:46', '2024-12-12 03:35:04'),
-(7, '', 'auditor', '$2y$10$gaZT6PYoj2W8FA8Jf/Tc1egcIbHy1xlXCJ6HrnorzGIVz7qOUZHja', 6, 1, 0, NULL, '2024-12-02 00:40:00', '2024-12-12 03:35:08');
+(7, '', 'auditor', '$2y$10$gaZT6PYoj2W8FA8Jf/Tc1egcIbHy1xlXCJ6HrnorzGIVz7qOUZHja', 6, 1, 0, NULL, '2024-12-02 00:40:00', '2024-12-12 03:35:08'),
+(8, 'ghaizar.bautista@bxucity.edu.ph', '21001235800', '$2y$10$ZWO34qySkjKA8RRN9By6b.2XMHh5wrOAOJ1w.5qZpzpTnd3r0m5o2', 4, 1, 0, NULL, '2024-12-12 03:40:44', '2024-12-12 04:17:06'),
+(9, 'ghaizar.bautistaa@bxucity.edu.ph', '13917692', '$2y$10$UN/5xxPp2lu2KHuZCtT4r.Py9Fh4IxMokrf2DXOPwX7gzEvYfBXSi', 4, 1, 0, NULL, '2024-12-12 06:59:04', '2024-12-12 06:59:26');
 
 --
 -- Indexes for dumped tables
@@ -744,7 +841,8 @@ INSERT INTO `users` (`user_id`, `email`, `username`, `password`, `role_id`, `isA
 -- Indexes for table `academic_record`
 --
 ALTER TABLE `academic_record`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_user_id` (`user_id`);
 
 --
 -- Indexes for table `academic_year`
@@ -777,18 +875,14 @@ ALTER TABLE `department`
 --
 ALTER TABLE `enrollment_history`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `enrollment_history_ibfk_4` (`adviser_id`),
-  ADD KEY `enrollment_history_ibfk_5` (`academic_year_id`);
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `grade_records`
 --
 ALTER TABLE `grade_records`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `eh_id` (`eh_id`),
-  ADD KEY `subject_id` (`subject_id`);
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `messages`
@@ -864,7 +958,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_record`
 --
 ALTER TABLE `academic_record`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `academic_year`
@@ -882,7 +976,7 @@ ALTER TABLE `attendance_records`
 -- AUTO_INCREMENT for table `campus_info`
 --
 ALTER TABLE `campus_info`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `department`
@@ -918,7 +1012,7 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `profiles`
 --
 ALTER TABLE `profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -936,7 +1030,7 @@ ALTER TABLE `rooms`
 -- AUTO_INCREMENT for table `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=175;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=254;
 
 --
 -- AUTO_INCREMENT for table `semester`
@@ -954,11 +1048,17 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `academic_record`
+--
+ALTER TABLE `academic_record`
+  ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `attendance_records`
@@ -971,11 +1071,7 @@ ALTER TABLE `attendance_records`
 -- Constraints for table `enrollment_history`
 --
 ALTER TABLE `enrollment_history`
-  ADD CONSTRAINT `enrollment_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `enrollment_history_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `grade_level` (`id`),
-  ADD CONSTRAINT `enrollment_history_ibfk_3` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`),
-  ADD CONSTRAINT `enrollment_history_ibfk_4` FOREIGN KEY (`adviser_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `enrollment_history_ibfk_5` FOREIGN KEY (`academic_year_id`) REFERENCES `academic_year` (`id`);
+  ADD CONSTRAINT `enrollment_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `grade_records`
