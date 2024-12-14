@@ -230,10 +230,220 @@ public function adviserDashboard() {
         exit();
     }
 
-    private function registrarDashboard() {
-    echo "Welcome to the Registrar Dashboard!";
-    include 'views/dashboard/registrar_dashboard.php';
+
+
+
+
+
+// public function registrarDashboard() {
+//     try {
+//         // Fetch counts and statistics
+//         $pendingCountStmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE role_id = 4 AND isActive = 0 AND isDelete = 0");
+//         $pendingCountStmt->execute();
+//         $pendingCount = $pendingCountStmt->fetch(PDO::FETCH_ASSOC)['count'];
+
+//         $acceptedCountStmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE role_id = 4 AND isActive = 1 AND isDelete = 0");
+//         $acceptedCountStmt->execute();
+//         $acceptedCount = $acceptedCountStmt->fetch(PDO::FETCH_ASSOC)['count'];
+
+//         // Fetch payment log
+//         $paymentLogStmt = $this->db->prepare("SELECT 
+//                CONCAT(
+//                     COALESCE(p.last_name, ''), ', ',
+//                     COALESCE(p.first_name, ''), ' ',
+//                     COALESCE(
+//                         CASE
+//                             WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+//                             THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+//                             ELSE ''
+//                         END, 
+//                         ''
+//                     )
+//                 ) AS fullname,
+//             pm.amount, 
+//             pm.date_pay 
+//             FROM payments pm
+//             LEFT JOIN enrollment_history eh on eh.id = pm.eh_id
+//             LEFT JOIN profiles p on p.profile_id = eh.user_id
+
+//             ORDER BY pm.date_pay DESC LIMIT 10");
+//         $paymentLogStmt->execute();
+//         $payment_log = $paymentLogStmt->fetchAll(PDO::FETCH_ASSOC);
+
+//         // Enrollment stats
+//         $stmt = $this->db->prepare("
+//             SELECT 
+//                 COUNT(eh.id) AS total_enrollments, 
+//                 SUM(CASE WHEN eh.status = 'ENROLLED' THEN 1 ELSE 0 END) AS total_enrolled,
+//                 SUM(CASE WHEN eh.status = 'Pending Payment' THEN 1 ELSE 0 END) AS pending_payment
+//             FROM enrollment_history eh
+//         ");
+//         $stmt->execute();
+//         $enrollmentStats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+//      include 'views/dashboard/registrar_dashboard.php';
+//     } catch (Exception $e) {
+//         echo "Error loading dashboard: " . $e->getMessage();
+//     }
+// }
+
+
+
+public function registrarDashboard() {
+    try {
+        // Fetch pending and accepted counts
+        $pendingCount = $this->getPendingCount();
+        $acceptedCount = $this->getAcceptedCount();
+
+        // Fetch latest payment log
+        $payment_log = $this->getLatestPayments(10);
+
+        // Fetch enrollment stats
+        $enrollmentStats = $this->getEnrollmentStats();
+
+        // Fetch graph data for enrollments over time (last 6 months)
+        $enrollmentTrends = $this->getEnrollmentTrends();
+
+        // Fetch graph data for payments over time (last 6 months)
+        $paymentTrends = $this->getPaymentTrends();
+
+        // Fetch Accepted and Pending Students Trends
+$acceptedStudentsTrends = $this->getAcceptedStudentsTrends();
+$pendingStudentsTrends = $this->getPendingStudentsTrends();
+
+
+        // Render the dashboard view
+        include 'views/dashboard/registrar_dashboard.php';
+    } catch (Exception $e) {
+        error_log("Dashboard error: " . $e->getMessage());
+        header('HTTP/1.1 500 Internal Server Error');
+        echo "An unexpected error occurred. Please try again later.";
+    }
 }
+
+
+// Fetch enrollment trends (for graph: number of enrollments over last 6 months)
+private function getEnrollmentTrends() {
+    $stmt = $this->db->prepare("
+        SELECT 
+            DATE_FORMAT(eh.enrollment_date, '%Y-%m') AS month, 
+            COUNT(*) AS enrollments
+        FROM enrollment_history eh
+        WHERE eh.enrollment_date >= CURDATE() - INTERVAL 6 MONTH
+        GROUP BY month
+        ORDER BY month ASC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Fetch payment trends (for graph: total payments over last 6 months)
+private function getPaymentTrends() {
+    $stmt = $this->db->prepare("
+        SELECT 
+            DATE_FORMAT(pm.date_pay, '%Y-%m') AS month, 
+            SUM(pm.amount) AS total_payments
+        FROM payments pm
+        WHERE pm.date_pay >= CURDATE() - INTERVAL 6 MONTH
+        GROUP BY month
+        ORDER BY month ASC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Fetch Accepted Students Trends (for graph: number of accepted students over the last 6 months)
+private function getAcceptedStudentsTrends() {
+    $stmt = $this->db->prepare("
+        SELECT 
+            DATE_FORMAT(uh.created_at, '%Y-%m') AS month, 
+            COUNT(*) AS accepted_students
+        FROM users uh
+        WHERE uh.role_id = 4 AND uh.isActive = 1 AND uh.isDelete = 0
+        AND uh.created_at >= CURDATE() - INTERVAL 6 MONTH
+        GROUP BY month
+        ORDER BY month ASC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Fetch Pending Students Trends (for graph: number of pending students over the last 6 months)
+private function getPendingStudentsTrends() {
+    $stmt = $this->db->prepare("
+        SELECT 
+            DATE_FORMAT(uh.created_at, '%Y-%m') AS month, 
+            COUNT(*) AS pending_students
+        FROM users uh
+        WHERE uh.role_id = 4 AND uh.isActive = 0 AND uh.isDelete = 0
+        AND uh.created_at >= CURDATE() - INTERVAL 6 MONTH
+        GROUP BY month
+        ORDER BY month ASC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Modular helper methods
+private function getPendingCount() {
+    $stmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE role_id = 4 AND isActive = 0 AND isDelete = 0");
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+}
+
+private function getAcceptedCount() {
+    $stmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE role_id = 4 AND isActive = 1 AND isDelete = 0");
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+}
+
+private function getLatestPayments($limit) {
+    $stmt = $this->db->prepare("
+        SELECT 
+            CONCAT(
+                COALESCE(p.last_name, ''), ', ',
+                COALESCE(p.first_name, ''), ' ',
+                COALESCE(
+                    CASE
+                        WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+                        THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+                        ELSE ''
+                    END, 
+                    ''
+                )
+            ) AS fullname,
+            pm.amount, 
+            DATE_FORMAT(pm.date_pay, '%M %d, %Y') AS date_pay
+        FROM payments pm
+        LEFT JOIN enrollment_history eh ON eh.id = pm.eh_id
+        LEFT JOIN profiles p ON p.profile_id = eh.user_id
+        ORDER BY pm.date_pay DESC
+        LIMIT :limit
+    ");
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+private function getEnrollmentStats() {
+    $stmt = $this->db->prepare("
+        SELECT 
+            COUNT(eh.id) AS total_enrollments, 
+            SUM(CASE WHEN eh.status = 'ENROLLED' THEN 1 ELSE 0 END) AS total_enrolled,
+            SUM(CASE WHEN eh.status = 'Pending Payment' THEN 1 ELSE 0 END) AS pending_payment
+        FROM enrollment_history eh
+    ");
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+
+
+
+
+
 
     private function defaultDashboard() {
       

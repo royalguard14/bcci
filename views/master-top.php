@@ -195,6 +195,9 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
   <script src="assets/dist/js/adminlte.min.js"></script>
   <!-- SweetAlert2 -->
 <script src="assets/plugins/sweetalert2/sweetalert2.min.js"></script>
+
+<!-- ChartJS -->
+<script src="assets/plugins/chart.js/Chart.min.js"></script>
  
 </body>
 </html>

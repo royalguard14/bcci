@@ -8,6 +8,20 @@ class StudentsController extends BaseController {
 
 
 
+
+public function profilespace(){
+  include 'views/student/profile.php';
+
+}
+
+
+
+
+
+
+
+
+
 public function acad_setup() {
     // Check if the academic report condition is met
     if ($this->acads_report <= 0) {

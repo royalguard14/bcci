@@ -109,6 +109,7 @@ $routes = [
 'fetchSubject' => ['controller' => 'StudentsController', 'action' => 'getSubjs'],
 'checkScheduleConflict' => ['controller' => 'StudentsController', 'action' => 'checkScheduleConflict'],
 'enrollSubjects' => ['controller' => 'StudentsController', 'action' => 'enrollSubjects'],
+'profile' => ['controller' => 'StudentsController', 'action' => 'profilespace'],
 
 
 
