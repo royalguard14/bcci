@@ -19,7 +19,7 @@
   <!-- /.login-logo -->
   <div class="card card-outline card-primary">
     <div class="card-header text-center">
-      <a href="assets/index2.html" class="h1"><b>Zear</b>Developer</a>
+      <a href="assets/index2.html" class="h1"><b>BCCI</a>
     </div>
     <div class="card-body">
 
