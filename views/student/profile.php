@@ -114,18 +114,8 @@ echo  htmlspecialchars(ucwords(strtolower($myInfo['section']))) . '<br>' . htmls
           $myInfo['municipality_city'] . ", " .  
           $myInfo['province'])) ?></p>
           <hr>
-          <strong><i class="fas fa-address-card mr-1"></i> Personal Attributes</strong>
-          <p class="text-muted">
-              <?php echo "<strong>Religion:</strong> <small>" . htmlspecialchars(ucwords($myInfo['religion'])) . "</small><br>"; ?>
-              <?php echo "<strong>Mother Tongue:</strong> <small>" . htmlspecialchars(ucwords($myInfo['mother_tongue'])) . "</small><br>"; ?>
-              <?php echo "<strong>Ethnic Group:</strong> <small>" . htmlspecialchars(ucwords($myInfo['ethnic_group'])) . "</small><br>"; ?>
-          </p>
-          <hr>
-          <strong><i class="far fa-file-alt mr-1"></i> Parents</strong>
-          <p class="text-muted">
-            <?php echo "<strong>Father:</strong> <small>" . htmlspecialchars(ucwords($myInfo['fathers_name'])) . "</small><br>"; ?>
-            <?php echo "<strong>Mother:</strong> <small>" . htmlspecialchars(ucwords($myInfo['mother_name'])) . "</small><br>"; ?>
-        </p>
+
+       
     </div>
 </div>
 </div>

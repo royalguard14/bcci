@@ -13,22 +13,65 @@
   <link rel="stylesheet" href="assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="assets/css/adminlte.min.css">
+  
+  <style>
+    body {
+      background-color: maroon;
+    }
+    .login-box {
+      width: 400px;
+    }
+    .card {
+      background-color: yellow;
+    }
+    .card-header a {
+      color: maroon;
+      font-weight: bold;
+    }
+    .card-body {
+      color: maroon;
+    }
+    .form-control {
+      border-color: maroon;
+      color: maroon;
+    }
+    .form-control:focus {
+      border-color: yellow;
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 0, 0.25);
+    }
+    .input-group-text {
+      background-color: maroon;
+      color: yellow;
+    }
+    .btn-primary {
+      background-color: maroon;
+      border-color: maroon;
+    }
+    .btn-primary:hover {
+      background-color: yellow;
+      border-color: yellow;
+      color: maroon;
+    }
+    .login-box-msg {
+      font-weight: bold;
+      font-size: 16px;
+    }
+  </style>
 </head>
-<body class="hold-transition login-page" style="background-color: maroon;">
-<div class="login-box" >
-  <!-- /.login-logo -->
-  <div class="card card-outline card-primary " style="background-color: yellow;">
+<body class="hold-transition login-page" style="background-color:maroon">
+<div class="login-box">
+  <div class="card card-outline card-primary">
     <div class="card-header text-center">
-      <a href="assets/index2.html" class="h1"><b>BCCI</a>
+      <a href="assets/index2.html" class="h1"><b>BCCI</b></a>
     </div>
     <div class="card-body">
 
-
      <?php if (!empty($_SESSION['login_error'])): ?>
-    <p class="login-box-msg text-danger"><?php echo htmlspecialchars($_SESSION['login_error']); ?></p>
-    <?php unset($_SESSION['login_error']); ?>
-<?php endif; ?>
-       <form action="login/submit" method="POST">
+      <p class="login-box-msg text-danger"><?php echo htmlspecialchars($_SESSION['login_error']); ?></p>
+      <?php unset($_SESSION['login_error']); ?>
+     <?php endif; ?>
+
+      <form action="login/submit" method="POST">
         <div class="input-group mb-3">
           <input type="text" class="form-control" placeholder="Email" name="username" autocomplete="new-username" >
           <div class="input-group-append">
@@ -46,24 +89,15 @@
           </div>
         </div>
         <div class="row">
-   
           <div class="col-12">
             <button type="submit" class="btn btn-primary btn-block">Sign In</button>
           </div>
-          <!-- /.col -->
         </div>
       </form>
 
-   
-
-
-
     </div>
-    <!-- /.card-body -->
   </div>
-  <!-- /.card -->
 </div>
-<!-- /.login-box -->
 
 <!-- jQuery -->
 <script src="assets/plugins/jquery/jquery.min.js"></script>
