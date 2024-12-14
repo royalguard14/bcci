@@ -115,6 +115,40 @@ public function bayadna() {
 
 
 
+public function bayadnapo() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        try {
+            // Get POST data
+            $ehID = $_POST['ehID'];
+            $amount = $_POST['amount'];
+            $remarks = $_POST['remarks'];
+
+            // Insert payment details into the payments table
+            $stmt = $this->db->prepare("
+                INSERT INTO payments (eh_id, amount, date_pay, remark) 
+                VALUES (:eh_id, :amount, NOW(), :remark)
+            ");
+            $stmt->bindParam(':eh_id', $ehID);
+            $stmt->bindParam(':amount', $amount);
+            $stmt->bindParam(':remark', $remarks);
+            $stmt->execute();
+
+
+
+            $_SESSION['success'] = "Payment successfully recorded!";
+            header("Location: paynow"); // Redirect to the accounting dashboard or appropriate page
+            exit;
+
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Error processing payment: " . $e->getMessage();
+            header("Location: paynow"); // Redirect on error
+            exit;
+        }
+    }
+}
+
+
+
 public function paymentlog(){
     try {
         $stmt = $this->db->prepare("SELECT 
@@ -149,6 +183,53 @@ public function paymentlog(){
 }
 
 
+public function sakitsaulo() {
+    try {
+        // Fetching payees with Pending Payment status
+        $stmt = $this->db->prepare("
+            SELECT
+                eh.id as ehID, 
+                CONCAT(
+                    COALESCE(p.last_name, ''), ', ',
+                    COALESCE(p.first_name, ''), ' ',
+                    COALESCE(
+                        CASE
+                            WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+                            THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+                            ELSE ''
+                        END, 
+                        ''
+                    )
+                ) AS fullname, 
+                d.course_name,
+                d.code as dcode,
+                eh.subjects_taken,
+                eh.status,
+                eh.semester_id,
+                CONCAT(ay.start, '-', ay.end) AS acads_year, 
+                eh.enrollment_date
+            FROM 
+                enrollment_history eh
+            LEFT JOIN
+                profiles p ON p.profile_id = eh.user_id
+            LEFT JOIN
+                department d ON d.id = eh.course_id
+            LEFT JOIN 
+                academic_year ay ON ay.id = eh.academic_year_id
+            WHERE
+                eh.status = 'ENROLLED'
+        ");
+        $stmt->execute();
+        $payee = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage();
+    }
+
+    include 'views/accounting/paybill.php';
+}
 
 
 

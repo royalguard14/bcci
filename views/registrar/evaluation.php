@@ -3,6 +3,19 @@ ob_start();
 $pageTitle = 'Enrollies Management'; 
 ?>
 <?php
+
+$semesterMap = [
+    1 => "I - 1st Sem",
+    2 => "I- 2nd Sem",
+    3 => "II - 1st Sem",
+    4 => "II - 2nd Sem",
+    5 => "III - 1st Sem",
+    6 => "III - 2nd Sem",
+    7 => "IV - 1st Sem",
+    8 => "IV - 2nd Sem",
+
+];
+
 function displayToastMessage($session_key, $toast_class, $title) {
   if (isset($_SESSION[$session_key])) {
     $message = $_SESSION[$session_key];
@@ -58,7 +71,21 @@ function displayToastMessage($session_key, $toast_class, $title) {
                     <td><?php echo htmlspecialchars(ucwords($data['fullname'])); ?></td>
                     <td><?php echo htmlspecialchars($data['dcode']); ?></td>
                     <td><?php echo htmlspecialchars($data['status']); ?></td>
-                    <td><?php  echo htmlspecialchars($data['semester_id'] . ' | ' . $data['acads_year']); ?> </td>
+                    <td>
+
+
+
+
+                      <?php  
+                      $semesterLabel = isset($semesterMap[$data['semester_id']]) ? $semesterMap[$data['semester_id']] : "Unknown Semester";
+
+                      echo htmlspecialchars($semesterLabel . ' | ' . $data['acads_year']); 
+
+                      ?> 
+
+
+
+                    </td>
                 <td>
 <?php if ($data['status'] == "Evaluation") : ?>
     <!-- Form for status 'Evaluation', allows user to proceed to payment -->
@@ -93,17 +120,22 @@ function generateCOE(ehID) {
         method: 'GET',
         data: { ehID: ehID },
         success: function(response) {
-            // Assuming the response contains the full COE layout
-            $('#coeDetails').html(response); // Insert the COE details into the div
-            
-            // Call print function
-            printCOE();
+            // Open the COE in a new window for printing
+            var printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Certificate of Employment</title>');
+            printWindow.document.write('<style>body{font-family: Arial, sans-serif; padding: 20px;}</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(response); // Write COE content
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
         },
         error: function() {
             alert('Error fetching COE details');
         }
     });
 }
+
 
 function printCOE() {
     var content = document.getElementById("coeDetails").innerHTML;

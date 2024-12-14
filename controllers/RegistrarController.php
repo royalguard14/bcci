@@ -311,23 +311,29 @@ public function getDetailCOE() {
                 $subjectsTaken = json_decode($coeDetails['subjects_taken'], true);
                 $subjectNames = [];
                 $allSchedules = [];
+                     $totalUnits = 0; // Initialize total units
 
                 // Fetch subject and schedule details for each subject and its scheduleIds
                 if ($subjectsTaken) {
                     foreach ($subjectsTaken as $subject) {
-                        // Fetch subject name and unit_lab using subjectId
+                        // Fetch subject name using subjectId
                         $subjectStmt = $this->db->prepare("
                             SELECT 
                                 s.name AS subject_name,
+                                  s.unit_lec,
                                 s.unit_lab
                             FROM subjects s
                             WHERE s.id = :subject_id
                         ");
                         $subjectStmt->execute(['subject_id' => $subject['subjectId']]);
                         $subjectData = $subjectStmt->fetch(PDO::FETCH_ASSOC);
-dd($subjectData);
+
                         if ($subjectData) {
                             $subjectNames[] = $subjectData['subject_name'];
+
+                                    // Calculate units for the subject
+                            $totalUnits += $subjectData['unit_lec'] + $subjectData['unit_lab'];
+
 
                             // Now fetch all schedules for each scheduleId in the scheduleIds array
                             $scheduleDetails = [];
@@ -336,9 +342,7 @@ dd($subjectData);
                                     SELECT
                                         sc.day,
                                         sc.time_slot,
-                                        sc.session_type,
-                                        sc.adviser,
-                                        sc.batch
+                                        sc.session_type
                                     FROM schedules sc
                                     WHERE sc.id = :schedule_id
                                 ");
@@ -347,7 +351,7 @@ dd($subjectData);
 
                                 if ($scheduleData) {
                                     // Store schedule details for each scheduleId
-                                    $scheduleDetails[] = $scheduleData['day'] . ', ' . $scheduleData['time_slot'] . ' | ' . $scheduleData['session_type'] ;
+                                    $scheduleDetails[] = $scheduleData['day'] . ', ' . $scheduleData['time_slot'] ;
                                 }
                             }
 
@@ -357,11 +361,71 @@ dd($subjectData);
                     }
                 }
 
+
+
+
+ // Decode campus_info for fees
+$campusStmt = $this->db->prepare("
+    SELECT function
+    FROM campus_info
+    WHERE id = 8
+");
+$campusStmt->execute();
+$feesRow = $campusStmt->fetch(PDO::FETCH_ASSOC);
+
+if ($feesRow) {
+    // Decode the JSON string in the 'function' column
+    $fees = json_decode($feesRow['function'], true);
+
+    if ($fees) {
+        $unitFee = $fees['unit_fee']; // Unit Fee
+        $fixedFees = $fees['handling_fee'] + $fees['laboratory_fee'] + 
+                     $fees['miscellaneous_fee'] + $fees['other_fee'] + 
+                     $fees['registration_fee']; // Total Fixed Fees
+
+        // Calculate the current assessment
+        $currentAssessment = ($totalUnits * $unitFee) + $fixedFees;
+
+        // Include current assessment in the COE details
+        $coeDetails['current_assessment'] = $currentAssessment;
+    } else {
+        echo "Error: Unable to decode fees JSON.";
+    }
+} else {
+    echo "Error: Fees data not found.";
+}
+
+
+// Calculate each fee
+$handlingFee = $fees['handling_fee'];
+$laboratoryFee = $fees['laboratory_fee'];
+$miscellaneousFee = $fees['miscellaneous_fee'];
+$otherFee = $fees['other_fee'];
+$registrationFee = $fees['registration_fee'];
+$tuitionFee = $fees['unit_fee'] * $totalUnits;
+// Calculate total fee
+$totalFee = $handlingFee + $laboratoryFee + $miscellaneousFee + $otherFee + $registrationFee + $tuitionFee;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 // Add subjects and schedules to the COE details
                 $coeDetails['subject_names'] = implode(', ', $subjectNames);
                 $coeDetails['schedules'] = implode('; ', $allSchedules);
 
-                
+                #dd($coeDetails['schedules']);
 
                 // Output the COE details
                 echo "<h4>Certificate of Employment</h4>";
@@ -373,17 +437,51 @@ dd($subjectData);
                 
                 // List Subjects and Schedules
                 echo "<h5>Subjects</h5>";
-                echo "<table border='1' cellpadding='5'>
-                        <tr><th>Subject</th><th>Schedule</th></tr>";
-                $subjectNames = explode(', ', $coeDetails['subject_names']);
-                $allSchedules = explode('; ', $coeDetails['schedules']);
-                
-                foreach ($subjectNames as $index => $subject) {
-                    echo "<tr><td>$subject</td><td>{$allSchedules[$index]}</td></tr>";
-                }
-                echo "</table>";
-                
-                // Display total payment
+echo "<table border='1' cellpadding='5'>
+        <tr><th>Subject</th><th>Schedule</th></tr>";
+
+$subjectNames = explode(', ', $coeDetails['subject_names']);  // Split the subjects into an array
+$allSchedules = explode('; ', $coeDetails['schedules']);  // Split the schedules into an array
+
+$subjectIndex = 0;  // Initialize subject index
+
+foreach ($subjectNames as $subject) {
+    // Initialize the schedule list for this subject
+    $subjectSchedules = [];
+
+    // Continue adding schedules for this subject
+    // Loop through all schedules, adding schedules based on the subject
+    while ($subjectIndex < count($allSchedules) && count($subjectSchedules) < 2) {
+        $subjectSchedules[] = $allSchedules[$subjectIndex];
+        $subjectIndex++;
+    }
+
+    // Display subject and its schedules in a list format
+    echo "<tr><td>$subject</td><td><ul>";
+
+    // Loop through the schedules for this subject and display them
+    foreach ($subjectSchedules as $schedule) {
+        echo "<li>$schedule</li>";
+    }
+
+    echo "</ul></td></tr>";
+}
+
+echo "</table>";
+
+
+
+    // Display the fee breakdown
+echo "<h3>Fee Breakdown</h3>";
+echo "<ul>";
+echo "<li>Handling Fee: ₱" . number_format($handlingFee, 2) . "</li>";
+echo "<li>Laboratory Fee: ₱" . number_format($laboratoryFee, 2) . "</li>";
+echo "<li>Miscellaneous Fee: ₱" . number_format($miscellaneousFee, 2) . "</li>";
+echo "<li>Other Fee: ₱" . number_format($otherFee, 2) . "</li>";
+echo "<li>Registration Fee: ₱" . number_format($registrationFee, 2) . "</li>";
+echo "<li>Tuition Fee: ₱" . number_format($tuitionFee, 2) . "</li>";
+echo "</ul>";
+echo "<h4>Total Fee: ₱" . number_format($totalFee, 2) . "</h4>";
                 echo "<p><strong>Total Payment:</strong> ₱" . number_format($coeDetails['total_payment'], 2) . "</p>";
             } else {
                 echo "<p>No details found for this enrollment.</p>";

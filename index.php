@@ -123,6 +123,8 @@ $routes = [
 'updatePaymentSetting' => ['controller' => 'AccountingController', 'action' => 'updatePaymentSetting'],
 'paymentlog' => ['controller' => 'AccountingController', 'action' => 'paymentlog'],
 'bayadna' => ['controller' => 'AccountingController', 'action' => 'bayadna'],
+'bayadnapo' => ['controller' => 'AccountingController', 'action' => 'bayadnapo'],
+'paynow' => ['controller' => 'AccountingController', 'action' => 'sakitsaulo'],
 
 
 

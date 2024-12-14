@@ -141,6 +141,18 @@ $(document).ready(function() {
 
 
 <?php if ($_SESSION['role_id'] === 5): ?>
+
+       <li class="nav-item">
+            <a href="paynow" class="nav-link <?= ($current_page == 'paynow') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-money-bill"></i>
+              <p>
+                PAY NOW!!
+               
+              </p>
+            </a>
+          </li>
+
+
        <li class="nav-item">
             <a href="paymentSetting" class="nav-link <?= ($current_page == 'paymentSetting') ? 'active' : ''; ?>">
               <i class="nav-icon fas fa-money-bill"></i>
