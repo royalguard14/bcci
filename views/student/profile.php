@@ -1,6 +1,19 @@
 <?php
 ob_start();
 $pageTitle = 'Personal Information'; 
+
+// Define the semester map
+$semesterMap = [
+    1 => "I - 1st Sem",
+    2 => "I - 2nd Sem",
+    3 => "II - 1st Sem",
+    4 => "II - 2nd Sem",
+    5 => "III - 1st Sem",
+    6 => "III - 2nd Sem",
+    7 => "IV - 1st Sem",
+    8 => "IV - 2nd Sem",
+];
+
 ?>
 
 <?php
@@ -54,7 +67,24 @@ if (isset($_SESSION['success'])) {
         htmlspecialchars(strtoupper(substr(trim($myInfo['middle_name']), 0, 1)) . '.') . ' ' . 
         htmlspecialchars(ucwords(strtolower($myInfo['last_name']))); ?>
     </h3>
-    <p class="text-muted text-center"><?php echo htmlspecialchars(ucwords(strtolower($myInfo['grade']))) .'-'.  htmlspecialchars(ucwords(strtolower($myInfo['section']))) ?></p>
+    <p class="text-muted text-center">
+<?php
+
+
+;
+// Get the semester label based on the section
+$semesterLabel = isset($semesterMap[(int)$myInfo['grade']]) ? $semesterMap[(int)$myInfo['grade']] : "Unknown Semester";
+
+// Output the semester and grade
+echo  htmlspecialchars(ucwords(strtolower($myInfo['section']))) . '<br>' . htmlspecialchars(ucwords($semesterLabel));
+?>
+
+
+
+
+
+
+    	</p>
 
 
 
@@ -103,7 +133,7 @@ if (isset($_SESSION['success'])) {
     <div class="card">
       <div class="card-header p-2">
         <ul class="nav nav-pills">
-          <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">School Form 9</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Grades</a></li>
           <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
           <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Account Setting</a></li>
       </ul>

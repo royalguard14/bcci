@@ -14,10 +14,10 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="assets/css/adminlte.min.css">
 </head>
-<body class="hold-transition login-page">
-<div class="login-box">
+<body class="hold-transition login-page" style="background-color: maroon;">
+<div class="login-box" >
   <!-- /.login-logo -->
-  <div class="card card-outline card-primary">
+  <div class="card card-outline card-primary " style="background-color: yellow;">
     <div class="card-header text-center">
       <a href="assets/index2.html" class="h1"><b>BCCI</a>
     </div>

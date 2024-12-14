@@ -18,10 +18,10 @@ class StudentsController extends BaseController {
         try {
             $stmt = $this->db->prepare("
                 SELECT
-        
+                d.course_name as section,
                 u.email,
                 u.username,
-           
+                eh.semester_id as grade,
                 p.sex,
                 p.photo_path,
                 COALESCE(p.first_name, 'No Data') AS first_name,
@@ -41,12 +41,33 @@ class StudentsController extends BaseController {
                 users u ON u.user_id = p.profile_id
                 LEFT join
                 enrollment_history eh ON eh.user_id = u.user_id 
+                Left join
+                department d on eh.course_id = d.id
                 WHERE 
                 u.user_id = :myID;
                 ");
             $stmt->bindValue(':myID', $myID, PDO::PARAM_INT);
             $stmt->execute();
             $myInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+/*{
+    "email": "ghaizar.bautista@bxucity.edu.ph",
+    "username": "21001235800",
+    "sex": "M",
+    "photo_path": "assets/documents/43614647/bautista.jpg",
+    "first_name": "Ghaizar",
+    "last_name": "bautista",
+    "middle_name": "Atara",
+    "birth_date": "10/13/1993",
+    "age": 31,
+    "contact_number": "09277294457",
+    "house_street_sitio_purok": "Purok 3 Upper",
+    "barangay": "Doongan",
+    "municipality_city": "Butuan",
+    "province": "Agusan Del Norte"
+}*/
+
+
             $stmt = $this->db->prepare("SELECT function FROM campus_info WHERE id = 5");
             $stmt->execute();
             $CampusInfoData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -135,14 +156,13 @@ if (empty($matchedSubjects)) {
                 WHERE
 
                 gr.user_id = :user_id 
-                
+                AND gr.term_id IN (1, 2, 3, 4)
                 AND gr.subject_id IN (" . implode(',', array_map('intval', $subjectIds)) . ")
                 ");
             $gradesStmt->bindValue(':user_id', $myID, PDO::PARAM_INT);
             $gradesStmt->execute();
             $grades = $gradesStmt->fetchAll(PDO::FETCH_ASSOC);
-            
-         
+        
             $gradeMap = [];
             foreach ($grades as $grade) {
     
