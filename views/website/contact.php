@@ -53,9 +53,9 @@ if (isset($_SESSION['success'])) {
         <div class="card-body row">
           <div class="col-5 text-center d-flex align-items-center justify-content-center">
             <div class="">
-              <h2>Zear<strong>Developer</strong></h2>
-              <p class="lead mb-5">Purok 3 Upper Doongan Butuan City<br>
-                Phone: +639277294457
+              <h2>Butuan City Colleges, <strong>Inc.</strong></h2>
+              <p class="lead mb-5">BCCI Annex, Chou Building, Montilla Blvd <br> Butuan City<br>
+                Phone: +63953 996 5290
               </p>
             </div>
           </div>

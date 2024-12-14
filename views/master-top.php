@@ -8,7 +8,7 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Butuan City Collage Inc</title>
+  <title>Butuan City College, Inc</title>
   
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -147,7 +147,7 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
       <div class="container">
         <a href="assets/index3.html" class="navbar-brand">
           <img src="assets/butuan-city-collges-logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-          <span class="brand-text font-weight-light">Butuan City Collage Inc</span>
+          <span class="brand-text font-weight-light">Butuan City College, Inc</span>
         </a>
         <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
