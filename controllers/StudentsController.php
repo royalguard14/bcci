@@ -9,8 +9,187 @@ class StudentsController extends BaseController {
 
 
 
-public function profilespace(){
-  include 'views/student/profile.php';
+
+
+
+   public function profilespace()
+    {
+        $myID = (int) $_SESSION['user_id'];
+        try {
+            $stmt = $this->db->prepare("
+                SELECT
+        
+                u.email,
+                u.username,
+           
+                p.sex,
+                p.photo_path,
+                COALESCE(p.first_name, 'No Data') AS first_name,
+                COALESCE(p.last_name, 'No Data') AS last_name,
+                COALESCE(p.middle_name, 'No Data') AS middle_name,
+                DATE_FORMAT(p.birth_date, '%m/%d/%Y') AS birth_date,
+                TIMESTAMPDIFF(YEAR, p.birth_date, '2024-10-31') - 
+                (DATE_FORMAT(p.birth_date, '%m-%d') > '10-31') AS age,
+                COALESCE(p.contact_number, '') AS contact_number,
+                COALESCE(p.house_street_sitio_purok, '') AS house_street_sitio_purok,
+                COALESCE(p.barangay, '') AS barangay,
+                COALESCE(p.municipality_city, '') AS municipality_city,
+                COALESCE(p.province, '') AS province
+                FROM 
+                profiles p
+                LEFT JOIN 
+                users u ON u.user_id = p.profile_id
+                LEFT join
+                enrollment_history eh ON eh.user_id = u.user_id 
+                WHERE 
+                u.user_id = :myID;
+                ");
+            $stmt->bindValue(':myID', $myID, PDO::PARAM_INT);
+            $stmt->execute();
+            $myInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $this->db->prepare("SELECT function FROM campus_info WHERE id = 5");
+            $stmt->execute();
+            $CampusInfoData = $stmt->fetch(PDO::FETCH_ASSOC);
+            $present_school_year = (int) $CampusInfoData['function'];
+
+
+
+
+
+
+            // Fetch Enrollment History
+$stmt = $this->db->prepare("
+    SELECT * 
+    FROM enrollment_history 
+    WHERE user_id = :user_id 
+    AND academic_year_id = :academic_year_id
+");
+$stmt->bindValue(':user_id', $myID, PDO::PARAM_INT);
+$stmt->bindValue(':academic_year_id', $present_school_year, PDO::PARAM_INT);
+$stmt->execute();
+$myenrollment_history = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+if (!$myenrollment_history) {
+    throw new Exception('You are not enrolled for the current academic year.');
+}
+
+// Decode subjects_taken JSON field
+$subjects_taken = json_decode($myenrollment_history['subjects_taken'], true);
+
+
+// Fetch subjects for the grade level
+$stmt = $this->db->prepare("
+    SELECT 
+    s.id AS subject_id,
+    s.name AS subject_name
+    FROM 
+    subjects s
+    WHERE 
+    FIND_IN_SET(s.id, (
+        SELECT 
+        sem.subject_ids
+        FROM 
+        semester sem
+        WHERE 
+        sem.course_id = :course_id AND sem.semester = :semester
+    )) > 0
+");
+$stmt->bindValue(':course_id', $myenrollment_history['course_id'], PDO::PARAM_INT);
+$stmt->bindValue(':semester', $myenrollment_history['semester_id'], PDO::PARAM_INT);
+$stmt->execute();
+$allSubjectInGrade = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+
+$subjectIds = array_column($allSubjectInGrade, 'subject_id');
+
+// Check if subjects were found
+if (empty($subjectIds)) {
+    throw new Exception('No subjects found for this grade level.');
+}
+
+// Get the subject IDs from subjects_taken
+$takenSubjectIds = array_column($subjects_taken, 'subjectId');
+
+// Find the intersection of available and taken subjects
+$matchedSubjects = array_intersect($subjectIds, $takenSubjectIds);
+
+if (empty($matchedSubjects)) {
+    throw new Exception('No matching subjects found for your enrollment.');
+}
+
+// You can now proceed with the logic for handling matched subjects
+
+        
+            $gradesStmt = $this->db->prepare("
+                SELECT 
+                gr.user_id, 
+                gr.subject_id, 
+                gr.grade
+                
+                FROM 
+                grade_records gr
+                LEFT JOIN enrollment_history eh on eh.id = gr.eh_id
+                WHERE
+
+                gr.user_id = :user_id 
+                
+                AND gr.subject_id IN (" . implode(',', array_map('intval', $subjectIds)) . ")
+                ");
+            $gradesStmt->bindValue(':user_id', $myID, PDO::PARAM_INT);
+            $gradesStmt->execute();
+            $grades = $gradesStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+         
+            $gradeMap = [];
+            foreach ($grades as $grade) {
+    
+                $gradeMap[$grade['subject_id']][$grade['grading_id']] = $grade['grade'];
+            }
+
+
+
+
+
+            $stmt = $this->db->prepare("
+                SELECT 
+                ar.date, 
+                ar.status,
+                MONTH(ar.date) AS month,
+                YEAR(ar.date) AS year
+                FROM 
+                attendance_records ar
+                LEFT JOIN 
+                enrollment_history eh ON ar.user_id = eh.user_id
+                WHERE 
+                ar.user_id = :user_id
+                AND eh.academic_year_id = :academic_year_id
+                Order by ar.date DESC
+                ");
+            $stmt->bindValue(':user_id', $myID, PDO::PARAM_INT);
+            $stmt->bindValue(':academic_year_id', $present_school_year, PDO::PARAM_INT);
+            $stmt->execute();
+            $myAttendance = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+            $attendanceByMonth = [];
+
+            foreach ($myAttendance as $record) {
+    $month = $record['month']; 
+    $attendanceByMonth[$month][] = [
+        'date' => $record['date'],
+        'status' => $record['status'],
+    ];
+}
+
+
+} catch (Exception $e) {
+    echo $e->getMessage();
+    return;
+}
+include 'views/student/profile.php';
 
 }
 
