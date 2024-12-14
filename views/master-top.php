@@ -36,14 +36,19 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
       color: yellow !important;
     }
 
-    .navbar-nav .nav-link.active {
-      color: white !important;
-      background-color: yellow !important;
-    }
+   .navbar-nav .nav-link.active {
+  color: black !important;
+  background-color: yellow !important;
+  border-radius: 15px !important; /* Adjust the value for the desired roundness */
+  padding: 5px 15px; /* Adjust padding to ensure the rounded corners look good */
+}
+
 
     .navbar-nav .nav-item:hover .nav-link {
       background-color: yellow !important;
       color: maroon !important;
+       border-radius: 15px !important; /* Adjust the value for the desired roundness */
+  padding: 5px 15px;
     }
 
     .content-wrapper {
