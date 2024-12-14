@@ -113,6 +113,18 @@ $routes = [
 
 
 
+'enrollies' => ['controller' => 'RegistrarController', 'action' => 'enrollies'],
+'toPayment' => ['controller' => 'RegistrarController', 'action' => 'toPayment'],
+'toPaymentConfirm' => ['controller' => 'RegistrarController', 'action' => 'toPaymentConfirm'],
+'getDetailCOE' => ['controller' => 'RegistrarController', 'action' => 'getDetailCOE'],
+ 
+
+'paymentSetting' => ['controller' => 'AccountingController', 'action' => 'paymentSetting'],
+'updatePaymentSetting' => ['controller' => 'AccountingController', 'action' => 'updatePaymentSetting'],
+'paymentlog' => ['controller' => 'AccountingController', 'action' => 'paymentlog'],
+'bayadna' => ['controller' => 'AccountingController', 'action' => 'bayadna'],
+
+
 
 
     

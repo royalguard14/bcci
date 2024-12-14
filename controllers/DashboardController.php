@@ -241,6 +241,67 @@ public function adviserDashboard() {
     }
 
 
+ private function accountingDashboard() {
+    try {
+        // Fetching payees with Pending Payment status
+        $stmt = $this->db->prepare("
+            SELECT
+                eh.id as ehID, 
+                CONCAT(
+                    COALESCE(p.last_name, ''), ', ',
+                    COALESCE(p.first_name, ''), ' ',
+                    COALESCE(
+                        CASE
+                            WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+                            THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+                            ELSE ''
+                        END, 
+                        ''
+                    )
+                ) AS fullname, 
+                d.course_name,
+                d.code as dcode,
+                eh.subjects_taken,
+                eh.status,
+                eh.semester_id,
+                CONCAT(ay.start, '-', ay.end) AS acads_year, 
+                eh.enrollment_date
+            FROM 
+                enrollment_history eh
+            LEFT JOIN
+                profiles p ON p.profile_id = eh.user_id
+            LEFT JOIN
+                department d ON d.id = eh.course_id
+            LEFT JOIN 
+                academic_year ay ON ay.id = eh.academic_year_id
+            WHERE
+                eh.status = 'Pending Payment'
+        ");
+        $stmt->execute();
+        $payee = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+                // Get total payment amount for the current year
+        $currentYear = date('Y'); // Get current year
+        $paymentStmt = $this->db->prepare("
+            SELECT SUM(amount) AS total_amount
+            FROM payments
+            WHERE YEAR(date_pay) = :currentYear
+        ");
+        $paymentStmt->bindParam(':currentYear', $currentYear, PDO::PARAM_INT);
+        $paymentStmt->execute();
+        $totalPayment = $paymentStmt->fetch(PDO::FETCH_ASSOC);
+        $totalAmountPaidThisYear = $totalPayment['total_amount'] ?? 0; // Default to 0 if no payments found
+
+
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage();
+    }
+
+    include 'views/dashboard/accounting_dashboard.php';
+}
+
+
 
 
 
@@ -250,15 +311,33 @@ public function adviserDashboard() {
     public function showDashboard() {
         $userRole = $_SESSION['role_id'];
         switch ($userRole) {
-            case 3: // Faculty
+             case 2: //Registrar
+            $this->registrarDashboard();
+            break;
+    
+            case 3: // instructor
             $this->adviserDashboard();
             break;
             case 4: //Learners
             $this->studentDashboard();
             break;
-            case 2: //Registrar
-            $this->registrarDashboard();
+             case 5: //Accounting Staff
+            $this->accountingDashboard();
             break;
+             case 6: //Auditor
+            $this->studentDashboard();
+            break;
+             case 7: //dean
+            $this->studentDashboard();
+            break;
+       
+
+
+
+
+
+
+
             default://Parents
             $this->defaultDashboard();
             break;

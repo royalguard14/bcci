@@ -19,9 +19,19 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
 <?php if ($_SESSION['role_id'] === 2): ?>
        <li class="nav-item">
             <a href="pending_student" class="nav-link <?= ($current_page == 'pending_student') ? 'active' : ''; ?>">
-              <i class="nav-icon fas fa-calendar-alt"></i>
+              <i class="nav-icon fas fa-user-plus"></i>
               <p>
                 New Registered
+                <span class="badge badge-info right">2</span>
+              </p>
+            </a>
+          </li>
+
+                 <li class="nav-item">
+            <a href="enrollies" class="nav-link <?= ($current_page == 'enrollies') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Enrollies
                 <span class="badge badge-info right">2</span>
               </p>
             </a>
@@ -128,6 +138,32 @@ $(document).ready(function() {
         </ul>
       </li>
     <?php endif; ?>
+
+
+<?php if ($_SESSION['role_id'] === 5): ?>
+       <li class="nav-item">
+            <a href="paymentSetting" class="nav-link <?= ($current_page == 'paymentSetting') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-money-bill"></i>
+              <p>
+                Payement Setting
+               
+              </p>
+            </a>
+          </li>
+
+                 <li class="nav-item">
+            <a href="paymentlog" class="nav-link <?= ($current_page == 'paymentlog') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-money-check"></i>
+              <p>
+                Payement log
+               
+              </p>
+            </a>
+          </li>
+
+
+ <?php endif; ?>
+
 
   </ul>
 </nav>

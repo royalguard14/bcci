@@ -1,12 +1,7 @@
 <?php
 ob_start();
-$pageTitle = 'Roles Management'; 
+$pageTitle = 'Payment History';  
 
-
-?>
-
-
-<?php
 // Function to display toast messages
 function displayToastMessage($session_key, $toast_class, $title) {
     if (isset($_SESSION[$session_key])) {
@@ -43,50 +38,10 @@ if (isset($_SESSION['success'])) {
 }
 ?>
 
-
-
-
-
-
-
-
 <div class="row">
-  <section class="col-lg-5 connectedSortable">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          
-
-          Sales
-        </h3>
-      </div>
-      <div class="card-body">
-        content
-      </div>
-    </div>
-  </section>
-  <section class="col-lg-7 connectedSortable">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          
-
-          Sales
-        </h3>
-      </div>
-      <div class="card-body">
-        content
-      </div>
-    </div>
-  </section>
-</div>
-<?php
-$content = ob_get_clean();
-include 'views/master.php';
-?>
-
-
-
+    <section class="col-lg-12 connectedSortable">
+        <div class="card">
+            <div class="card-body">
                 <table class="table table-head-fixed text-nowrap" id="example2">
                     <thead>
                         <tr>
@@ -115,3 +70,12 @@ include 'views/master.php';
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<?php
+$content = ob_get_clean();
+include 'views/master.php';
+?>

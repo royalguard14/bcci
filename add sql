@@ -1,0 +1,8 @@
+CREATE TABLE `payments` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `eh_id` INT(11) NOT NULL,
+    `amount` DECIMAL(10, 2) NOT NULL,
+    `date_pay` DATETIME NOT NULL,
+    `remark` TEXT,
+    FOREIGN KEY (`eh_id`) REFERENCES `enrollment_history`(`id`) ON DELETE CASCADE
+);
