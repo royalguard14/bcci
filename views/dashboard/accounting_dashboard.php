@@ -165,26 +165,3 @@ include 'views/master.php';
 ?>
 
 
-
-<table class="table table-head-fixed text-nowrap" id="example2">
-
-  <thead>
-    <tr>
-      <th>No.</th>
-      <th>Program</th>
-      <th>Manage</th>
-    </tr>
-  </thead>
-  <tbody>
-    <?php foreach ($department as $index => $data) { ?>
-      <tr>
-        <td><?php echo $index + 1; ?></td>
-        <td><?php echo htmlspecialchars($data['code']); ?></td>
-        <td>
-
-        </td>
-
-      </tr>
-    <?php } ?>
-  </tbody>
-</table>
