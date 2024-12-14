@@ -19,6 +19,8 @@ class BaseController {
     protected $myEnrollmentStatus;
     protected $mycourseID;
 
+    protected $myName;
+
 
     public function __construct($db, $permissions = []) {
         $this->db = $db;
@@ -153,6 +155,36 @@ protected function checkacadsreport(){
 
     protected function initializeUserDetails() {
         $userId = $_SESSION['user_id'];
+
+
+$stmt = $this->db->prepare("SELECT 
+    CONCAT(
+        COALESCE(last_name, ''), ', ',
+        COALESCE(first_name, ''), ' ',
+        COALESCE(
+            CASE
+                WHEN middle_name IS NOT NULL AND middle_name != '' 
+                THEN CONCAT(SUBSTRING(middle_name, 1, 1), '.')
+                ELSE ''
+            END, 
+            ''
+        )
+    ) AS fullname
+FROM profiles WHERE profile_id = :user_id");
+
+$stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+$stmt->execute();
+$this->myName = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($this->myName) {
+    $this->myName['fullname'];
+} else {
+    $_SESSION['error'] = "No Profile data yet";
+}
+
+
+
+
         $stmt = $this->db->prepare("SELECT COUNT(*) AS record_count FROM academic_record WHERE user_id = :user_id");
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute();

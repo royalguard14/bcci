@@ -174,7 +174,7 @@ if (!isset($_SESSION['log_in']) || !$_SESSION['log_in']) {
           <img src="assets/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Alexander Pierce</a>
+          <a href="#" class="d-block"><?= $this->myName ?></a>
         </div>
       </div>
 
