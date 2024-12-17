@@ -1,8 +1,6 @@
 <?php
 ob_start();
 $pageTitle = $this->deanDept; 
-
-
 ?>
 
 
@@ -51,20 +49,38 @@ if (isset($_SESSION['success'])) {
 
 
 <div class="row">
-  <section class="col-lg-5 connectedSortable">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          
 
-          Sales
-        </h3>
-      </div>
-      <div class="card-body">
-        content
-      </div>
+<section class="col-lg-5 connectedSortable">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Set New Instructor</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="addInstructors">
+                <!-- Instructor Dropdown -->
+                <select name="instructor_id" id="instructorSelect" class="form-control">
+                    <option disabled selected>Select Instructor</option>
+                    <?php if (isset($instructors_unassign) && !empty($instructors_unassign)): ?>
+                    
+                        <?php foreach ($instructors_unassign as $index => $data): ?>
+                            <option value="<?php echo $data['user_id']; ?>"><?php echo htmlspecialchars($data['fullname']); ?></option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <option value="" disabled>No unassigned instructors available</option>
+                    <?php endif; ?>
+                </select>
+        </div>
+        <div class="card-footer">
+            <button class="form-control btn btn-success" type="submit">Register</button>
+        </div>
+        </form>
     </div>
-  </section>
+</section>
+
+
+
+
+
   <section class="col-lg-7 connectedSortable">
     <div class="card">
       <div class="card-header">
@@ -75,36 +91,28 @@ if (isset($_SESSION['success'])) {
         </h3>
       </div>
       <div class="card-body">
-        content
-      </div>
-    </div>
-  </section>
-</div>
-<?php
-$content = ob_get_clean();
-include 'views/master.php';
-?>
-
-
-
-                <table class="table table-head-fixed text-nowrap" id="example2">
+            <table class="table table-head-fixed text-nowrap" id="example3">
                     <thead>
                         <tr>
                             <th>No.</th>
                             <th>Name</th>
-                            <th>Amount</th>
-                            <th>Date</th>
+                            <th>Action</th>
+                      
                         
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (isset($payment_log)): ?>
-                            <?php foreach ($payment_log as $index => $data) { ?>
+                        <?php if (isset($instructors)): ?>
+                            <?php foreach ($instructors as $index => $data) { ?>
                                 <tr>
                                     <td><?php echo $index + 1; ?></td>
                                     <td><?php echo htmlspecialchars($data['fullname']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['amount']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['date_pay']); ?></td>
+         		<td>            
+         			<form action="remove-teacher-from-dept" method="POST" style="display:inline;">
+              <input type="hidden" name="user_id" value="<?php echo $data['user_id']; ?>">
+              <button type="submit" class="btn btn-block btn-outline-danger ml-1">Remove</button>
+            </form>
+        </td>
                                  
                                 </tr>
                             <?php } ?>
@@ -115,3 +123,16 @@ include 'views/master.php';
                         <?php endif; ?>
                     </tbody>
                 </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<?php
+$content = ob_get_clean();
+include 'views/master.php';
+?>
+
+
+
+            

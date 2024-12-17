@@ -126,7 +126,7 @@ Enroll new Department
                     </button>
                     <div class="dropdown-menu" role="menu">
                       <a class="dropdown-item" href="#" onclick="openRooms('<?php echo $department['id']; ?>')"> Rooms</a>
-                      <a class="dropdown-item" href="#" onclick="openPermissions('<?php echo $department['id']; ?>', '2')"> Instructor</a>
+                      <a class="dropdown-item" href="#" onclick="openDean('<?php echo $department['id']; ?>', '2')"> DEAN</a>
                
                     </div>
                     </div>
@@ -221,7 +221,28 @@ Enroll new Department
 </div>
 
 
-
+<div class="modal fade" id="deansModal">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Available Deans</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="deanform">
+                    <input type="hidden" id="department_id"> <!-- Hidden input for department ID -->
+                    <div id="deanlist" style="max-height: 400px; overflow-y: auto;"></div> <!-- List of deans will be populated here -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="assignDeanButton">Assign Dean</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <script type="text/javascript">
@@ -276,6 +297,100 @@ function openRooms(id) {
         }
     });
 }
+
+
+
+// JavaScript function to open the dean modal and fetch data
+function openDean(departmentId) {
+    // Store the departmentId in a hidden input field
+    $('#department_id').val(departmentId);
+
+    $.ajax({
+        url: 'campus-department/dean', // PHP file path
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ id: departmentId }),
+        dataType: 'json',
+        success: function(response) {
+            console.log('Response:', response);
+
+            if (response.success) {
+                var deanList = $('#deanlist');
+                deanList.empty(); // Clear any existing data
+
+                // Hide the button by default
+                $('#assignDeanButton').hide();
+
+                // Check if the dean is already assigned
+                if (response.assigned_dean) {
+                    // Show the assigned dean's info
+                    var assignedDean = response.assigned_dean;
+                    deanList.append(`
+                        <div class="alert alert-info">Dean is already assigned: ${assignedDean.full_name}</div>
+                    `);
+                }
+
+                // If no dean is assigned, show available deans
+                if (response.available_deans && response.available_deans.length > 0) {
+                    response.available_deans.forEach(function(dean) {
+                        deanList.append(`
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="dean" value="${dean.user_id}" id="dean${dean.user_id}">
+                                <label class="form-check-label" for="dean${dean.user_id}">
+                                    ${dean.full_name}
+                                </label>
+                            </div>
+                        `);
+                    });
+                    
+                    // Show the assign button if there are available deans
+                    $('#assignDeanButton').show();
+                } else {
+                    deanList.append('<div class="alert alert-warning">No available deans found.</div>');
+                }
+
+                // Show the modal
+                $('#deansModal').modal('show');
+            } else {
+                showToast('Error', response.message); // Display error message if any
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            showToast('Error', 'An error occurred while fetching deans.');
+        }
+    });
+}
+
+
+
+
+$('#assignDeanButton').on('click', function() {
+    var departmentId = document.getElementById('department_id').value;
+    var selectedDean = $("input[name='dean']:checked").val(); // Get the selected dean's user_id
+    
+    if (selectedDean) {
+        // Send AJAX request to assign the dean
+        $.ajax({
+            url: 'campus-department/deanadd', // PHP file to handle the assignment
+            method: 'POST',
+            data: { department_id: departmentId, dean_id: selectedDean },
+            success: function(response) {
+                alert('Dean assigned successfully!');
+                $('#deansModal').modal('hide');
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Failed to assign dean');
+            }
+        });
+    } else {
+        alert('Please select a dean to assign.');
+    }
+});
+
+
+
 
 function updateDepartmentRoomIds(departmentId) {
     var selectedRooms = [];

@@ -30,12 +30,12 @@ $pageTitle = 'Permission Management';
         </h3>
       </div>
       <div class="card-body">
-       <table id="example2" class="table table-bordered table-hover">
+       <table id="perm" class="table table-bordered table-hover ">
         <thead>
           <tr>
             <th style="text-align: center;">#</th>
             <th style="text-align: center;">Name</th>
-            <th colspan="2" style="text-align: center;">Action</th>
+            <th style="text-align: center;">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -45,33 +45,27 @@ $pageTitle = 'Permission Management';
             <tr>
              <td style="text-align: center;"><?php echo $index++; ?></td> 
              <td ><?php echo $permission['permission_name']; ?></td>
-             <td>
+             <td style="text-align:center;">
+              <div class="btn-group">
               <button type="button" 
-              class="btn btn-block btn-outline-primary btn-xs" 
+              class="btn btn-block btn-outline-primary mr-1" 
               data-toggle="modal" 
               data-target="#modal-default"
               onclick="openUpdateModal(<?php echo $permission['permission_id']; ?>, '<?php echo $permission['permission_name']; ?>')">
               Update
             </button>
-          </td>
- 
-          <td>
+     
             <form action="permissions/delete" method="POST" style="display:inline;">
               <input type="hidden" name="permission_id" value="<?php echo $permission['permission_id']; ?>">
-              <button type="submit" class="btn btn-block btn-outline-danger btn-xs">Drop</button>
+              <button type="submit" class="btn btn-block btn-outline-danger ml-1">Drop</button>
             </form>
+          </div>
           </td>
         </tr>
       <?php endforeach; ?>
     <?php endif; ?>
   </tbody>
-  <tfoot>
-    <tr>
-     <th style="text-align: center;">#</th>
-     <th style="text-align: center;">Name</th>
-     <th colspan="2" style="text-align: center;">Action</th>
-   </tr>
- </tfoot>
+
 </table>
 </div>
 </div>
@@ -116,4 +110,16 @@ include 'views/master.php';
     document.getElementById('modal-permission-id').value = permID;
     document.getElementById('modal-permission-name').value = permName;
   }
+</script>
+
+<script type="text/javascript">
+    $('#perm').DataTable({
+    "paging": true,
+    "lengthChange": false,
+    "searching": true,
+    "ordering": false,
+    "info": true,
+    "autoWidth": true,
+    "responsive": true,
+  });
 </script>

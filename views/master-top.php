@@ -16,128 +16,18 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
   <link rel="stylesheet" href="assets/plugins/fontawesome-free/css/all.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="assets/dist/css/adminlte.min.css">
+   <link rel="stylesheet" href="assets/css/bccicolor.css">
   <!-- jQuery -->
   <script src="assets/plugins/jquery/jquery.min.js"></script>
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="assets/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="assets/plugins/sweetalert2-theme-bootstrap-4/sw.js"></script>
+  <!-- DataTables -->
+  <link rel="stylesheet" href="assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <link rel="stylesheet" href="assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
 
-  <style type="text/css">
-    body {
-      background-color: maroon;
-      color: white;
-    }
-
-    .navbar {
-      background-color: maroon !important;
-    }
-
-    .navbar-brand, .navbar-nav .nav-link {
-      color: yellow !important;
-    }
-
-   .navbar-nav .nav-link.active {
-  color: black !important;
-  background-color: yellow !important;
-  border-radius: 15px !important; /* Adjust the value for the desired roundness */
-  padding: 5px 15px; /* Adjust padding to ensure the rounded corners look good */
-}
-
-
-    .navbar-nav .nav-item:hover .nav-link {
-      background-color: yellow !important;
-      color: maroon !important;
-       border-radius: 15px !important; /* Adjust the value for the desired roundness */
-  padding: 5px 15px;
-    }
-
-    .content-wrapper {
-      background-color: #f4f6f9;
-      color: maroon;
-    }
-
-    .content-header h1 {
-      color: maroon;
-    }
-
-    .card-header {
-      background-color: yellow;
-      color: maroon;
-    }
-
-    .card-body {
-      background-color: white;
-      color: maroon;
-    }
-
-    .footer {
-      background-color: maroon;
-      color: yellow;
-    }
-
-    .btn-primary {
-      background-color: maroon;
-      border-color: maroon;
-    }
-
-    .btn-primary:hover {
-      background-color: yellow;
-      border-color: yellow;
-      color: maroon;
-    }
-
-    .control-sidebar-dark {
-      background-color: maroon;
-      color: yellow;
-    }
-
-    .drawer {
-      position: fixed;
-      right: 0;
-      top: 0;
-      height: 100%;
-      width: 300px;
-      background: #fff;
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
-      transform: translateX(100%);
-      transition: transform 0.3s;
-      padding: 1rem !important;
-      z-index: 9999;
-    }
-
-    .drawer.open {
-      transform: translateX(0);
-    }
-
-    .chat-windows {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 9998;
-    }
-
-    .direct-chat {
-      width: 100%;
-      background: #fff;
-      border: 1px solid #ddd;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .input-group input {
-      border-radius: 20px;
-    }
-
-    .input-group-append button {
-      border-radius: 20px;
-      background-color: maroon;
-      color: white;
-    }
-
-  </style>
-
+ 
 </head>
 <body class="hold-transition layout-top-nav layout-footer-fixed">
 
@@ -159,7 +49,10 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
         </div>
         <!-- Right navbar links -->
         <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-          <!-- Home Link -->
+
+
+          <?php if (!isset($_SESSION['log_in'])): ?>
+                      <!-- Home Link -->
           <li class="nav-item">
             <a href="home" class="nav-link <?= ($current_page == 'home') ? 'active' : ''; ?>">Home</a>
           </li>
@@ -168,8 +61,6 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
           <li class="nav-item">
             <a href="contact" class="nav-link <?= ($current_page == 'contact') ? 'active' : ''; ?>">Contact Us</a>
           </li>
-
-          <?php if (!isset($_SESSION['log_in'])): ?>
           <!-- Guest Links -->
           <li class="nav-item">
             <a href="register" class="nav-link <?= ($current_page == 'register') ? 'active' : ''; ?>">Enroll Now!</a>
@@ -178,20 +69,42 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
             <a href="login" class="nav-link <?= ($current_page == 'login') ? 'active' : ''; ?>">Login</a>
           </li>
           <?php else: ?>
-          <?php if ($this->acads_report <= 0): ?>
+          <?php if ($this->acads_report <= 0 &&  $this->myRoleID == 4): ?>
           <!-- Academic Setup for Logged-in Users Without Records -->
           <li class="nav-item">
             <a href="acad_setting" class="nav-link <?= ($current_page == 'acad_setting') ? 'active' : ''; ?>">Academic Setup</a>
           </li>
           <?php else: ?>
-          <?php if ($this->myEnrollmentStatus <= 0 && $this->campusDataEnrollmentStatus == 1): ?>
+          <?php if ($this->myEnrollmentStatus <= 0 && $this->campusDataEnrollmentStatus == 1 && $this->myRoleID == 4): ?>
           <li class="nav-item">
             <a href="addsubject" class="nav-link <?= ($current_page == 'addsubject') ? 'active' : ''; ?>">Choose Subject</a>
           </li>
           <?php endif; ?>
+           <?php if ($this->myRoleID == 4): ?>
           <li class="nav-item">
             <a href="profile" class="nav-link <?= ($current_page == 'profile') ? 'active' : ''; ?>">My Profile</a>
           </li>
+
+                   <li class="nav-item dropdown">
+            <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Records</a>
+            <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+              <li><a href="enrollment-history" class="dropdown-item">Enrollment History </a></li>
+              <li class="dropdown-divider"></li>
+
+              <li><a href="academic-record" class="dropdown-item">Academic Records</a></li>
+              <li class="dropdown-divider"></li>
+               <li><a href="academic-payment" class="dropdown-item">Payment</a></li>
+         
+            </ul>
+
+          </li>
+
+        <li class="nav-item">
+            <a href="documents" class="nav-link <?= ($current_page == 'documents') ? 'active' : ''; ?>">Documents</a>
+          </li>
+
+
+  <?php endif; ?>
           <?php endif; ?>
 
           <!-- Logout Link -->
@@ -243,21 +156,90 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
       <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
     </footer>
   </div><!-- ./wrapper -->
+<!-- jQuery and jQuery UI -->
+<script src="assets/plugins/jquery/jquery.min.js"></script>
+<script src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
 
-  <!-- jQuery -->
-  <script src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
-  <script src="assets/plugins/jquery/jquery.min.js"></script>
-  <script src="assets/js/widget.js"></script>
-  <script src="assets/js/qrcode.js"></script>
-  <!-- Bootstrap 4 -->
-  <script src="assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- AdminLTE App -->
-  <script src="assets/dist/js/adminlte.min.js"></script>
-  <!-- SweetAlert2 -->
-  <script src="assets/plugins/sweetalert2/sweetalert2.min.js"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
 
-  <!-- ChartJS -->
-  <script src="assets/plugins/chart.js/Chart.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- AdminLTE App -->
+<script src="assets/js/adminlte.js"></script>
+
+<!-- ChartJS -->
+<script src="assets/plugins/chart.js/Chart.min.js"></script>
+
+<!-- Sparkline -->
+<script src="assets/plugins/sparklines/sparkline.js"></script>
+
+<!-- JQVMap -->
+<script src="assets/plugins/jqvmap/jquery.vmap.min.js"></script>
+<script src="assets/plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+
+<!-- jQuery Knob Chart -->
+<script src="assets/plugins/jquery-knob/jquery.knob.min.js"></script>
+
+<!-- daterangepicker -->
+<script src="assets/plugins/moment/moment.min.js"></script>
+<script src="assets/plugins/daterangepicker/daterangepicker.js"></script>
+
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<!-- Summernote -->
+<script src="assets/plugins/summernote/summernote-bs4.min.js"></script>
+
+<!-- overlayScrollbars -->
+<script src="assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+
+<!-- SweetAlert2 -->
+<script src="assets/plugins/sweetalert2/sweetalert2.min.js"></script>
+
+<!-- DataTables  & Plugins -->
+<script src="assets/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="assets/plugins/jszip/jszip.min.js"></script>
+<script src="assets/plugins/pdfmake/pdfmake.min.js"></script>
+<script src="assets/plugins/pdfmake/vfs_fonts.js"></script>
+<script src="assets/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="assets/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="assets/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+<!-- Widget and QRCode -->
+<script src="assets/js/widget.js"></script>
+<script src="assets/js/qrcode.js"></script>
+
+<!-- Initialize DataTables -->
+<script type="text/javascript">
+  $('#example2').DataTable({
+    "paging": true,
+    "lengthChange": false,
+    "searching": false,
+    "ordering": true,
+    "info": true,
+    "autoWidth": false,
+    "responsive": true,
+  });
+
+  $('#example3').DataTable({
+    "paging": true,
+    "lengthChange": false,
+    "searching": true,
+    "ordering": true,
+    "info": true,
+    "autoWidth": false,
+    "responsive": true,
+  });
+</script>
 
 </body>
 </html>

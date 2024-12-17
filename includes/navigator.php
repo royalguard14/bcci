@@ -138,7 +138,17 @@ $(document).ready(function() {
         </ul>
       </li>
     <?php endif; ?>
-
+<?php if ($_SESSION['role_id'] === 7): ?>
+        <li class="nav-item">
+            <a href="instructors" class="nav-link <?= ($current_page == 'instructors') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Instructors
+               
+              </p>
+            </a>
+          </li>
+<?php endif; ?>
 
 <?php if ($_SESSION['role_id'] === 5): ?>
 

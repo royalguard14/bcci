@@ -41,7 +41,115 @@ class DepartmentController extends BaseController {
 
 
 
+public function getDean() {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $deptID = $input['id']; 
 
+    // Step 1: Check if a dean is assigned to the current department
+    $stmt = $this->db->prepare("SELECT 
+        ei.user_id,
+        CONCAT(
+                COALESCE(p.last_name, ''), ', ',
+                COALESCE(p.first_name, ''), ' ',
+                COALESCE(
+                    CASE
+                        WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+                        THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+                        ELSE ''
+                    END, 
+                    ''
+                )
+            ) AS full_name
+        FROM employment_info ei 
+        LEFT JOIN users u ON u.user_id = ei.user_id
+        LEFT JOIN profiles p ON p.profile_id = u.user_id
+        WHERE 
+        ei.course_id = :deptID
+        AND u.role_id = '7'");  // Role ID for dean is assumed to be '7'
+    $stmt->bindParam(':deptID', $deptID, PDO::PARAM_INT);
+    $stmt->execute();
+    $dean = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Step 2: If no dean is assigned to the department, find available deans
+    if (!$dean) {
+        // Fetch all users with role_id = 7 who are not assigned to this department and are not assigned to other departments
+        $stmt = $this->db->prepare("
+            SELECT u.user_id, 
+                 CONCAT(
+                COALESCE(p.last_name, ''), ', ',
+                COALESCE(p.first_name, ''), ' ',
+                COALESCE(
+                    CASE
+                        WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+                        THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+                        ELSE ''
+                    END, 
+                    ''
+                )
+            ) AS full_name
+            FROM users u 
+            LEFT JOIN employment_info ei ON u.user_id = ei.user_id AND ei.course_id != :deptID  -- Exclude deans already assigned to this department
+            LEFT JOIN profiles p ON p.profile_id = u.user_id
+            WHERE 
+            u.role_id = '7' 
+            AND ei.user_id IS NULL"); // Exclude deans already assigned to other departments
+        $stmt->bindParam(':deptID', $deptID, PDO::PARAM_INT);
+        $stmt->execute();
+        $available_deans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Step 3: Return the available deans in the response
+        echo json_encode([
+            'success' => true,
+            'message' => 'No dean assigned, here are the available deans.',
+            'available_deans' => $available_deans // Send the list of available deans
+        ]);
+    } else {
+        // Step 4: Dean is already assigned to the department
+        echo json_encode([
+            'success' => true,
+            'message' => 'Dean is already assigned.',
+            'assigned_dean' => $dean // Return the current assigned dean
+        ]);
+    }
+}
+
+
+public function getDeanadd() {
+// Get the POST data
+$department_id = $_POST['department_id']; // Department ID
+$dean_id = $_POST['dean_id']; // Selected Dean's user ID
+// Check if the department ID and dean ID are set
+if (isset($department_id) && isset($dean_id)) {
+    try {
+        // Check if the dean is already assigned to this department (just in case)
+        $stmt = $this->db->prepare("SELECT * FROM employment_info WHERE course_id = :department_id AND user_id = :dean_id");
+        $stmt->bindParam(':department_id', $department_id, PDO::PARAM_INT);
+        $stmt->bindParam(':dean_id', $dean_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            // If a record already exists, we can return a message saying it's already assigned
+            echo json_encode(['success' => false, 'message' => 'This dean is already assigned to the department.']);
+        } else {
+            // Insert the dean into the department
+            $stmt = $this->db->prepare("INSERT INTO employment_info (user_id, course_id) VALUES (:dean_id, :department_id)");
+            $stmt->bindParam(':dean_id', $dean_id, PDO::PARAM_INT);
+            $stmt->bindParam(':department_id', $department_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Return success response
+            echo json_encode(['success' => true, 'message' => 'Dean successfully assigned to the department.']);
+        }
+
+    } catch (PDOException $e) {
+        // Handle any errors
+        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    }
+} else {
+    // If the parameters are not set
+    echo json_encode(['success' => false, 'message' => 'Invalid data provided.']);
+}
+}
 
 
 

@@ -14,7 +14,7 @@ public function showCampusProfile() {
         $academicYear = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Fetch campus information
-        $stmt = $this->db->prepare("SELECT * FROM campus_info WHERE id NOT IN (0)");
+        $stmt = $this->db->prepare("SELECT * FROM campus_info WHERE id IN (2,3,4,5,6,7,9,10)");
         $stmt->execute();
         $campusInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

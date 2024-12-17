@@ -59,7 +59,7 @@ if (isset($_SESSION['success'])) {
 Pending Payment        </h3>
       </div>
       <div class="card-body">
-<table class="table table-head-fixed text-nowrap" id="example">
+<table class="table table-head-fixed text-nowrap" id="example3">
     <thead>
         <tr>
             <th>No.</th>
@@ -75,9 +75,10 @@ Pending Payment        </h3>
                     <td><?php echo htmlspecialchars(ucwords($data['fullname'])); ?></td>
                     <td>
                         <!-- Action: Proceed to payment -->
-                        <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#paymentModal" data-ehid="<?php echo $data['ehID']; ?>" data-name="<?php echo htmlspecialchars(ucwords($data['fullname'])); ?>">
-                            Proceed to Payment
-                        </button>
+              <button type="button" class="btn btn-primary btn-xs" onclick="payEnrollmentFee('<?php echo $data['ehID']; ?>')">
+    Proceed to Payment
+</button>
+
                     </td>
                 </tr>
             <?php } ?>
@@ -109,7 +110,7 @@ Pending Payment        </h3>
             <div class="modal-body">
                 <form action="bayadnapo" method="POST">
                     <input type="hidden" name="ehID" id="ehID">
-                    <input type="hidden" name="name" id="name">
+          
 
                     <div class="form-group">
                         <label for="amount">Enter Payment Amount</label>
@@ -129,18 +130,24 @@ Pending Payment        </h3>
 </div>
 
 <script type="text/javascript">
-    // Handle modal data population
+    function payEnrollmentFee(ehID) {
+ 
+       
+        $('#ehID').val(ehID); // Set the value of the hidden field for ehID
+ 
+
+        // Show the modal after populating the hidden fields
+        $('#paymentModal').modal('show');
+    }
+
+    // Event listener for the modal trigger button
     $('#paymentModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var ehID = button.data('ehid'); // Extract the ehID
-        var name = button.data('name'); // Extract the name
-
-        // Update the modal's content
-        var modal = $(this);
-        modal.find('#ehID').val(ehID);
-        modal.find('#name').val(name);
+  
     });
 </script>
+
 
 
 <?php

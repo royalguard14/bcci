@@ -1,0 +1,112 @@
+    body {
+      background-color: maroon;
+      color: white;
+    }
+
+    .navbar {
+      background-color: maroon !important;
+    }
+
+    .navbar-brand, .navbar-nav .nav-link {
+      color: yellow !important;
+    }
+
+   .navbar-nav .nav-link.active {
+  color: black !important;
+  background-color: yellow !important;
+  border-radius: 15px !important; /* Adjust the value for the desired roundness */
+  padding: 5px 15px; /* Adjust padding to ensure the rounded corners look good */
+}
+
+
+    .navbar-nav .nav-item:hover .nav-link {
+      background-color: yellow !important;
+      color: maroon !important;
+       border-radius: 15px !important; /* Adjust the value for the desired roundness */
+  padding: 5px 15px;
+    }
+
+    .content-wrapper {
+      background-color: #f4f6f9;
+      color: maroon;
+    }
+
+    .content-header h1 {
+      color: maroon;
+    }
+
+    .card-header {
+      background-color: yellow;
+      color: maroon;
+    }
+
+    .card-body {
+      background-color: white;
+      color: maroon;
+    }
+
+    .footer {
+      background-color: maroon;
+      color: yellow;
+    }
+
+    .btn-primary {
+      background-color: maroon;
+      border-color: maroon;
+    }
+
+    .btn-primary:hover {
+      background-color: yellow;
+      border-color: yellow;
+      color: maroon;
+    }
+
+    .control-sidebar-dark {
+      background-color: maroon;
+      color: yellow;
+    }
+
+    .drawer {
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 300px;
+      background: #fff;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+      transform: translateX(100%);
+      transition: transform 0.3s;
+      padding: 1rem !important;
+      z-index: 9999;
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .chat-windows {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9998;
+    }
+
+    .direct-chat {
+      width: 100%;
+      background: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .input-group input {
+      border-radius: 20px;
+    }
+
+    .input-group-append button {
+      border-radius: 20px;
+      background-color: maroon;
+      color: white;
+    }

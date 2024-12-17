@@ -70,8 +70,6 @@ if (isset($_SESSION['success'])) {
     <p class="text-muted text-center">
 <?php
 
-
-;
 // Get the semester label based on the section
 $semesterLabel = isset($semesterMap[(int)$myInfo['grade']]) ? $semesterMap[(int)$myInfo['grade']] : "Unknown Semester";
 
@@ -124,7 +122,7 @@ echo  htmlspecialchars(ucwords(strtolower($myInfo['section']))) . '<br>' . htmls
       <div class="card-header p-2">
         <ul class="nav nav-pills">
           <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Grades</a></li>
-          <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
+          <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Class Schedule</a></li>
           <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Account Setting</a></li>
       </ul>
   </div>
@@ -147,6 +145,21 @@ echo  htmlspecialchars(ucwords(strtolower($myInfo['section']))) . '<br>' . htmls
     $totalGrades = 0;
     $completedSubjects = 0; // Counter for subjects with complete grades
 
+    // Function to map numeric grades to grade points
+    function mapGradeToPoint($grade) {
+        if ($grade >= 97.50 && $grade <= 100) return 1.00;
+        if ($grade >= 94.50 && $grade < 97.50) return 1.25;
+        if ($grade >= 91.50 && $grade < 94.50) return 1.50;
+        if ($grade >= 88.50 && $grade < 91.50) return 1.75;
+        if ($grade >= 85.50 && $grade < 88.50) return 2.00;
+        if ($grade >= 82.50 && $grade < 85.50) return 2.25;
+        if ($grade >= 79.50 && $grade < 82.50) return 2.50;
+        if ($grade >= 76.50 && $grade < 79.50) return 2.75;
+        if ($grade >= 74.50 && $grade < 76.50) return 3.00;
+        if ($grade < 74.50) return 3.25;
+        return 'No Grade';
+    }
+
     foreach ($allSubjectInGrade as $subject): 
         $grades = [
             '1st Grading' => isset($gradeMap[$subject['subject_id']][1]) ? $gradeMap[$subject['subject_id']][1] : 'No Grade',
@@ -161,18 +174,25 @@ echo  htmlspecialchars(ucwords(strtolower($myInfo['section']))) . '<br>' . htmls
                       is_numeric($grades['3rd Grading']) &&
                       is_numeric($grades['4th Grading']);
 
+        // Map numeric grades to grade points
+        $gradePoints = array_map(function($grade) {
+            return is_numeric($grade) ? mapGradeToPoint($grade) : $grade;
+        }, $grades);
+
         $averageGrade = $isComplete 
-            ? (array_sum($grades) / 4) 
+            ? array_sum(array_map('mapGradeToPoint', $grades)) / 4 
             : 'Incomplete';
 
         ?>
         <tr>
             <td><?php echo $subject['subject_name']; ?></td>
-            <td style="text-align: center;"><?php echo $grades['1st Grading']; ?></td>
-            <td style="text-align: center;"><?php echo $grades['2nd Grading']; ?></td>
-            <td style="text-align: center;"><?php echo $grades['3rd Grading']; ?></td>
-            <td style="text-align: center;"><?php echo $grades['4th Grading']; ?></td>
-            <td style="text-align: center;"><?php echo is_numeric($averageGrade) ? number_format($averageGrade, 2) : $averageGrade; ?></td>
+            <td style="text-align: center;"><?php echo $gradePoints['1st Grading']; ?></td>
+            <td style="text-align: center;"><?php echo $gradePoints['2nd Grading']; ?></td>
+            <td style="text-align: center;"><?php echo $gradePoints['3rd Grading']; ?></td>
+            <td style="text-align: center;"><?php echo $gradePoints['4th Grading']; ?></td>
+            <td style="text-align: center;">
+                <?php echo is_numeric($averageGrade) ? number_format($averageGrade, 2) : $averageGrade; ?>
+            </td>
         </tr>
         <?php 
         if ($isComplete) {
@@ -196,57 +216,110 @@ echo  htmlspecialchars(ucwords(strtolower($myInfo['section']))) . '<br>' . htmls
     </tr>
 </table>
 
+
     </div>
     <div class="tab-pane" id="timeline">
-        <div class="timeline timeline-inverse">
-            <?php foreach ($attendanceByMonth as $month => $records): ?>
-                <div class="time-label">
-                    <span class="bg-blue">
-                        <?php echo date('F Y', strtotime("2024-$month-01")); ?>
-                    </span>
-                </div>
-                <?php foreach ($records as $record): ?>
-                    <div>
-                        <?php
-                        $bgClassMap = [
-                            'P' => 'bg-success', 
-                            'A' => 'bg-danger',  
-                            'T' => 'bg-warning', 
-                            'E' => 'bg-primary'  
-                        ];
-                        $bgClass = $bgClassMap[$record['status']] ?? 'bg-secondary'; 
-                        ?>
-                        <i class="fas fa-calendar-day <?php echo $bgClass; ?>"></i>
-                        <div class="timeline-item">
-                            <span class="time"><i class="far fa-clock"></i> <?php $date = new DateTime($record['date']);echo $date->format('F j'); ?></span>
-                            <h3 class="timeline-header border-0">
-                                Status: <strong>
-                                    <?php 
-                                    $statusMap = [
-                                        'P' => 'Present',
-                                        'A' => 'Absent',
-                                        'E' => 'Excuse',
-                                        'T' => 'Tardy'
-                                    ];
-                                    echo $statusMap[$record['status']] ?? 'Unknown'; 
-                                    ?>
-                                </strong>
-                            </h3>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endforeach; ?>
-            <div>
-                <i class="far fa-clock bg-gray"></i>
-            </div>
-        </div>
+
+<table class="schedule-table" border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <?php  
+
+echo "<style>
+    table.schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 1em; /* Default font size */
+        text-align: center;
+    }
+    table.schedule-table th, table.schedule-table td {
+        border: 1px solid #ddd; /* Light grey grid lines */
+        padding: 10px;
+    }
+    table.schedule-table th {
+        background-color: #f4f4f4;
+        color: #333;
+        font-weight: bold;
+    }
+    table.schedule-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    table.schedule-table tr:hover {
+        background-color: #f1f1f1;
+    }
+    table.schedule-table td {
+        vertical-align: middle;
+    }
+    table.schedule-table th:first-child,
+    table.schedule-table td:first-child {
+        background-color: #f8f8f8;
+        font-weight: bold;
+    }
+    .empty-cell {
+        background-color: #f4f4f4;
+        color: #aaa;
+    }
+
+    /* Make text size responsive */
+    @media (max-width: 1200px) {
+        table.schedule-table {
+            font-size: 0.9em; /* Slightly smaller font for medium screens */
+        }
+    }
+
+    @media (max-width: 992px) {
+        table.schedule-table {
+            font-size: 0.8em; /* Smaller font for smaller screens */
+        }
+    }
+
+    @media (max-width: 768px) {
+        table.schedule-table {
+            font-size: 0.7em; /* Even smaller font for mobile screens */
+        }
+    }
+
+    @media (max-width: 576px) {
+        table.schedule-table {
+            font-size: 0.6em; /* Smallest font size for very small screens */
+        }
+    }
+</style>";
+
+         ?>
+<?php 
+
+echo "<tr><th>Time</th>";
+foreach ($days as $day) {
+    echo "<th>$day</th>";
+}
+echo "</tr>";
+ ?>
+    </thead>
+    <tbody>
+        <?php
+ foreach ($timeSlots as $timeSlot) {
+    echo "<tr>";
+    echo "<td>$timeSlot</td>";
+    foreach ($days as $day) {
+        if (isset($scheduleMap[$day][$timeSlot])) {
+            echo "<td>" . implode("<br>", $scheduleMap[$day][$timeSlot]) . "</td>";
+        } else {
+            echo "<td class='empty-cell'>-</td>";
+        }
+    }
+    echo "</tr>";
+}        ?>
+    </tbody>
+</table>
+
     </div>
     <div class="tab-pane" id="settings">
         <form class="form-horizontal" method="POST" action="updateuserpass" autocomplete="off">
           <div class="form-group row">
             <label for="inputUsername" class="col-sm-2 col-form-label">Username</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="username" value="<?php echo htmlspecialchars($myInfo['username']); ?>">
+              <input type="text" class="form-control" name="username" value="<?php echo htmlspecialchars($myInfo['username']); ?>" readonly>
           </div>
       </div>
       <div class="form-group row">
@@ -339,9 +412,34 @@ $(document).ready(function() {
                 return xhr;
             },
             success: function(response) {
-                 window.location.reload(); // Corrected this line
-                               $('#user-modal').modal('hide');
-                // Optionally update the profile photo on the page.
+        if (response.success) {
+       
+
+Swal.fire({
+  position: "center",
+  icon: "success", // Corrected the typo ("succres" -> "success")
+  title: "Your work has been saved",
+  showConfirmButton: false,
+  timer: 1500
+}).then(() => { // Use a callback function here
+  var newSrc = response.newPhotoPath + '?t=' + new Date().getTime(); // Add timestamp to avoid caching
+  $('.profile-user-img').attr('src', newSrc);
+
+  // Hide the modal
+  $('#user-modal').modal('hide');
+});
+
+
+
+
+
+
+
+
+    } else {
+        alert(response.message || 'Error updating profile picture.');
+    }
+
             },
             error: function() {
                 alert('Error uploading file.');

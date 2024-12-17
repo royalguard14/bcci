@@ -75,6 +75,8 @@ $routes = [
 'campus-department/subject' => ['controller' => 'DepartmentController', 'action' => 'getSubjects'],
 
 'campus-department/rooms' => ['controller' => 'DepartmentController', 'action' => 'getRooms'],
+'campus-department/dean' => ['controller' => 'DepartmentController', 'action' => 'getDean'],
+'campus-department/deanadd' => ['controller' => 'DepartmentController', 'action' => 'getDeanadd'],
 'campus-department/update-rooms' => ['controller' => 'DepartmentController', 'action' => 'updateDepartmentRoomIds'],
 
 
@@ -110,6 +112,16 @@ $routes = [
 'checkScheduleConflict' => ['controller' => 'StudentsController', 'action' => 'checkScheduleConflict'],
 'enrollSubjects' => ['controller' => 'StudentsController', 'action' => 'enrollSubjects'],
 'profile' => ['controller' => 'StudentsController', 'action' => 'profilespace'],
+'uploadprofile' => ['controller' => 'StudentsController', 'action' => 'uploadprofile'],
+'updateuserpass' => ['controller' => 'StudentsController', 'action' => 'updateuserpass'],
+'enrollment-history' => ['controller' => 'StudentsController', 'action' => 'enrollmenthistory'],
+'academic-record' => ['controller' => 'StudentsController', 'action' => 'allgrades'],
+'academic-payment' => ['controller' => 'StudentsController', 'action' => 'allpayments'],
+'documents' => ['controller' => 'StudentsController', 'action' => 'mydocuments'],
+'uploadDocs' => ['controller' => 'StudentsController', 'action' => 'uploadDocs'],
+'deleteFile' => ['controller' => 'StudentsController', 'action' => 'deleteFile'],
+
+
 
 
 
@@ -126,6 +138,14 @@ $routes = [
 'bayadna' => ['controller' => 'AccountingController', 'action' => 'bayadna'],
 'bayadnapo' => ['controller' => 'AccountingController', 'action' => 'bayadnapo'],
 'paynow' => ['controller' => 'AccountingController', 'action' => 'sakitsaulo'],
+
+
+
+
+
+'instructors' => ['controller' => 'DeanController', 'action' => 'instructors'],
+'addInstructors' => ['controller' => 'DeanController', 'action' => 'addInstrutors'],
+'remove-teacher-from-dept' => ['controller' => 'DeanController', 'action' => 'removeInstrutors'],
 
 
 

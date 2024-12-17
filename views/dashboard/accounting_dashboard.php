@@ -90,10 +90,13 @@ Pending Payment        </h3>
                     <td><?php echo $index + 1; ?></td>
                     <td><?php echo htmlspecialchars(ucwords($data['fullname'])); ?></td>
                     <td>
-                        <!-- Action: Proceed to payment -->
-                        <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#paymentModal" data-ehid="<?php echo $data['ehID']; ?>" data-name="<?php echo htmlspecialchars(ucwords($data['fullname'])); ?>">
-                            Proceed to Payment
-                        </button>
+<button type="button" class="btn btn-primary btn-xs" onclick="payEnrollmentFee('<?php echo $data['ehID']; ?>')">
+    Proceed to Payment
+</button>
+
+
+
+
                     </td>
                 </tr>
             <?php } ?>
@@ -112,7 +115,6 @@ Pending Payment        </h3>
 </div>
 
 
-<!-- Modal -->
 <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -125,7 +127,7 @@ Pending Payment        </h3>
             <div class="modal-body">
                 <form action="bayadna" method="POST">
                     <input type="hidden" name="ehID" id="ehID">
-                    <input type="hidden" name="name" id="name">
+                 
 
                     <div class="form-group">
                         <label for="amount">Enter Payment Amount</label>
@@ -134,7 +136,9 @@ Pending Payment        </h3>
 
                     <div class="form-group">
                         <label for="remarks">Remarks</label>
-                        <textarea class="form-control" id="remarks" name="remarks"></textarea>
+                        <select class="form-control" id="remarks" name="remarks">
+                            <option value="enrolmentfee">Enrollment FEE</option>
+                        </select>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Submit Payment</button>
@@ -145,18 +149,24 @@ Pending Payment        </h3>
 </div>
 
 <script type="text/javascript">
-    // Handle modal data population
+    function payEnrollmentFee(ehID) {
+ 
+       
+        $('#ehID').val(ehID); // Set the value of the hidden field for ehID
+ 
+
+        // Show the modal after populating the hidden fields
+        $('#paymentModal').modal('show');
+    }
+
+    // Event listener for the modal trigger button
     $('#paymentModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var ehID = button.data('ehid'); // Extract the ehID
-        var name = button.data('name'); // Extract the name
-
-        // Update the modal's content
-        var modal = $(this);
-        modal.find('#ehID').val(ehID);
-        modal.find('#name').val(name);
+  
     });
 </script>
+
 
 
 <?php

@@ -53,7 +53,7 @@ $pageTitle = 'User Management';
         </h3>
       </div>
       <div class="card-body">
-       <table id="example3" class="table table-bordered table-hover">
+       <table id="example4" class="table table-bordered table-hover">
         <thead>
           <tr>
             <th style="text-align: center;">#</th>
@@ -70,9 +70,10 @@ $pageTitle = 'User Management';
              <td style="text-align: center;"><?php echo $index++; ?></td> 
              <td style="text-align: center;"><?php echo $user['username']; ?></td>
              <td style="text-align: center;"><?php echo $user['isActive'] ? 'Active' : 'Inactive'; ?></td>
-<td>
+<td style="text-align:center;">
+  <div class="btn-group">
   <button type="button" 
-          class="btn btn-block btn-outline-primary btn-xs" 
+          class="btn btn-block btn-outline-primary mr-1" 
           data-toggle="modal" 
           data-target="#user-modal"
           onclick="openUserUpdateModal(<?php echo $user['user_id']; ?>, '<?php echo $user['username']; ?>', <?php echo $user['role_id']; ?>, <?php echo $user['isActive']; ?>)">
@@ -81,8 +82,10 @@ $pageTitle = 'User Management';
 
             <form action="/BCCI/account/delete" method="POST" style="display:inline;">
               <input type="hidden" name="user_id" value="<?php echo $user['user_id']; ?>">
-              <button type="submit" class="btn btn-block btn-outline-danger btn-xs">Delete</button>
+              <button type="submit" class="btn btn-block btn-outline-danger ml-1">Delete</button>
             </form>
+
+            </div>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -183,7 +186,7 @@ include 'views/master.php';
 </script>
 
 <script type="text/javascript">
-      $('#example3').DataTable({
+      $('#example4').DataTable({
       "paging": true,
       "lengthChange": false,
       "searching": true,

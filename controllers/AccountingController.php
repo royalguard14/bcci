@@ -72,6 +72,7 @@ public function bayadna() {
             $ehID = $_POST['ehID'];
             $amount = $_POST['amount'];
             $remarks = $_POST['remarks'];
+      
 
             // Insert payment details into the payments table
             $stmt = $this->db->prepare("
@@ -87,7 +88,7 @@ public function bayadna() {
             $paymentStmt = $this->db->prepare("
                 SELECT SUM(amount) AS total_paid 
                 FROM payments 
-                WHERE eh_id = :eh_id
+                WHERE eh_id = :eh_id AND remark = 'enrolmentfee'
             ");
             $paymentStmt->bindParam(':eh_id', $ehID);
             $paymentStmt->execute();
@@ -122,6 +123,7 @@ public function bayadnapo() {
             $ehID = $_POST['ehID'];
             $amount = $_POST['amount'];
             $remarks = $_POST['remarks'];
+
 
             // Insert payment details into the payments table
             $stmt = $this->db->prepare("

@@ -20,6 +20,13 @@ class BaseController {
     protected $mycourseID;
 
     protected $myName;
+    protected $mycurrenEhID;
+    protected $myRoleID;
+    protected $deanDept;
+    protected $deanDeptid;
+    
+    protected $campusName;
+
 
 
     public function __construct($db, $permissions = []) {
@@ -157,6 +164,40 @@ protected function checkacadsreport(){
         $userId = $_SESSION['user_id'];
 
 
+
+$stmt = $this->db->prepare("
+    SELECT d.course_name, d.id
+    FROM employment_info ei
+    LEFT JOIN department d ON ei.course_id = d.id
+    WHERE ei.user_id = :user_id
+");
+
+$stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+$stmt->execute();
+
+// Fetch the result
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Check if a result was returned
+if ($result) {
+    $this->deanDept = $result['course_name'];
+     $this->deanDeptid = $result['id'];
+} else {
+    // Handle case where no department is found for this user
+    $this->deanDept = null; // Or set it to a default value, if necessary
+    $this->deanDeptid = null;
+}
+
+
+if ($this->myRoleID == 7) {
+$stmt = $this->db->prepare("SELECT 
+role_id
+FROM users WHERE user_id = :user_id");
+$stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+$stmt->execute();
+$this->myRoleID = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 $stmt = $this->db->prepare("SELECT 
     CONCAT(
         COALESCE(last_name, ''), ', ',
@@ -196,11 +237,12 @@ if ($this->myName) {
         $course_id = $stmt->fetch(PDO::FETCH_ASSOC);
         $this->mycourseID = $course_id ? (int) $course_id['c_id'] : null;
 
-        $stmt = $this->db->prepare("SELECT function, name FROM campus_info WHERE id IN (5,7) ORDER BY FIELD(id, 5, 7);");
+        $stmt = $this->db->prepare("SELECT function, name FROM campus_info WHERE id IN (5,7,2) ORDER BY FIELD(id, 5, 7, 2);");
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $this->campusDataCurrentAcademicYear = (int) $result[0]['function'];
         $this->campusDataEnrollmentStatus = (int) $result[1]['function'];
+        $this->campusName = $result[2]['function'];
 
         $stmt = $this->db->prepare("
             SELECT COUNT(*) AS record_count 
@@ -216,6 +258,17 @@ if ($this->myName) {
         $stmt->bindParam(':academic_year_id', $this->campusDataCurrentAcademicYear, PDO::PARAM_INT); 
         $stmt->execute();
         $this->myEnrollmentStatus = (int) $stmt->fetch(PDO::FETCH_ASSOC)['record_count'];
+    
+
+
+  $stmt = $this->db->prepare("SELECT id FROM enrollment_history WHERE user_id = :user_id AND academic_year_id = :academic_year_id");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT); 
+        $stmt->bindParam(':academic_year_id', $this->campusDataCurrentAcademicYear, PDO::PARAM_INT); 
+        $stmt->execute();
+        $eh_id = $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->mycurrenEhID = $eh_id ? (int) $eh_id['id'] : null;
+
+
     }
 
 

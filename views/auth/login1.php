@@ -73,7 +73,7 @@
 
       <form action="login/submit" method="POST">
         <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="Email" name="username" autocomplete="new-username" >
+          <input type="text" class="form-control" placeholder="Email / USN" name="username" autocomplete="new-username" >
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-envelope"></span>

@@ -1,0 +1,131 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.certificate-container {
+    width: 80%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #ccc;
+}
+
+.header-table {
+    width: 100%;
+    margin-bottom: 30px;
+    border: none;
+    text-align: center;
+}
+
+.header-table td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.certificate-title h1 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #2a2a2a;
+    margin: 0;
+}
+
+.logo img {
+    width: 100px; /* Adjust logo size */
+    height: auto;
+}
+
+.school-info p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 5px 0;
+}
+
+.school-info p {
+     margin: 0;  /* Removes the default margin */
+    padding: 0; /* Removes the padding */
+    line-height: 1.4; /* Optional: Adjust line height if necessary */
+}
+
+
+.student-info {
+    margin-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.student-info p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 5px 0;
+}
+
+.course-info h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+table th {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 16px;
+    color: #555;
+}
+
+.statement {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.date {
+    font-size: 14px;
+    color: #888;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .certificate-container {
+        width: 90%;
+    }
+
+    .certificate-title h1 {
+        font-size: 28px;
+    }
+
+    .school-info p {
+        font-size: 14px;
+    }
+
+    .student-info p {
+        font-size: 14px;
+    }
+
+    table th, table td {
+        padding: 8px;
+        font-size: 14px;
+    }
+}

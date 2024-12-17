@@ -7,6 +7,160 @@ class DashboardController extends BaseController {
     }
 
 
+
+
+
+    private function deanDashboard() {
+        $deptID = $this->deanDeptid;
+        $totalStudent = 0;
+        $totalInstructor = 0;
+        $totalGraduate = 0;
+        $totalSubject = 0;
+
+
+        $stmt = $this->db->prepare("SELECT count(*) as totalstudent FROM academic_record WHERE c_id = :c_id");
+        $stmt->bindValue(':c_id', $deptID, PDO::PARAM_INT);
+        $stmt->execute();
+        $campusInfoData = $stmt->fetch(PDO::FETCH_ASSOC);
+        $totalStudent = (int)$campusInfoData['totalstudent'];
+
+
+        $stmt = $this->db->prepare("SELECT count(*) as totalInstructor 
+            FROM users u 
+            LEFT JOIN employment_info ei ON ei.user_id = u.user_id
+            WHERE 
+            u.role_id = '3' 
+            AND ei.course_id = :c_id
+            ");
+        $stmt->bindValue(':c_id', $deptID, PDO::PARAM_INT);
+        $stmt->execute();
+        $campusInfoData = $stmt->fetch(PDO::FETCH_ASSOC);
+        $totalInstructor = (int)$campusInfoData['totalInstructor'];
+
+
+        $stmt = $this->db->prepare("SELECT subject_ids FROM semester WHERE course_id = :c_id");
+        $stmt->bindValue(':c_id', $deptID, PDO::PARAM_INT);
+        $stmt->execute();
+        $allsubsid = $stmt->fetchALL(PDO::FETCH_ASSOC);
+        $allSubjectIds = [];
+        foreach ($allsubsid as $row) {
+            $subjectIds = explode(',', $row['subject_ids']);
+            $allSubjectIds = array_merge($allSubjectIds, $subjectIds);
+        }
+        $allSubjectIds = array_filter($allSubjectIds, function($value) {
+            return !empty($value);
+        });
+        $allSubjectIds = array_unique($allSubjectIds);
+        $allSubjectIds = array_values($allSubjectIds);
+        $totalSubject = count($allSubjectIds);
+
+
+
+##from here para sa graduation List
+// Fetch all students under the department
+        $stmt = $this->db->prepare("SELECT user_id FROM academic_record WHERE c_id = :c_id");
+        $stmt->bindValue(':c_id', $deptID, PDO::PARAM_INT);
+        $stmt->execute();
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Extract student IDs into an array
+        $studentIds = [];
+        foreach ($students as $student) {
+            $studentIds[] = $student['user_id'];
+        }
+
+
+
+// Fetch grade records for these students
+        $stmt = $this->db->prepare("
+            SELECT gr.user_id, gr.subject_id, gr.term_id, gr.grade
+            FROM grade_records gr
+            WHERE gr.user_id IN (" . implode(",", $studentIds) . ")");
+        $stmt->execute();
+        $gradeRecords = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+// Group grades by student and subject
+        $studentsGrades = [];
+
+        foreach ($gradeRecords as $gradeRecord) {
+            $userId = $gradeRecord['user_id'];
+            $subjectId = $gradeRecord['subject_id'];
+            $grade = $gradeRecord['grade'];
+
+    // Initialize the student array if not exists
+            if (!isset($studentsGrades[$userId])) {
+                $studentsGrades[$userId] = [];
+            }
+
+    // Initialize the subject array if not exists
+            if (!isset($studentsGrades[$userId][$subjectId])) {
+                $studentsGrades[$userId][$subjectId] = [
+                    'grades' => []
+                ];
+            }
+
+    // Add grade to the corresponding subject
+            $studentsGrades[$userId][$subjectId]['grades'][] = $grade;
+        }
+
+        $graduatingStudents = [];
+$passingGrade = 75;  // Set the passing grade threshold
+
+// Loop through each student
+foreach ($studentsGrades as $userId => $subjects) {
+    $allPassed = true;  // Assume student passes all subjects initially
+
+    // Loop through each subject (from all available subjects)
+    foreach ($allSubjectIds as $subjectId) {
+        // Check if the student has grades for this subject
+        if (isset($subjects[$subjectId])) {
+            // Calculate the average grade for this subject
+            $averageGrade = array_sum($subjects[$subjectId]['grades']) / count($subjects[$subjectId]['grades']);
+
+            // If the average grade is less than the passing grade, mark as failed
+            if ($averageGrade < $passingGrade) {
+                $allPassed = false;
+                break;  // No need to check further subjects for this student
+            }
+        } else {
+            // If the student doesn't have grades for the subject, mark as failed
+            $allPassed = false;
+            break;
+        }
+    }
+
+    // If the student passed all subjects, add to the graduation list
+    if ($allPassed) {
+        $graduatingStudents[] = $userId;
+    }
+}
+
+#uptohere
+// foreach ($graduatingStudents as $userId) {
+//     echo "Student ID: " . $userId . " is eligible to graduate.<br>";
+// }
+
+$totalGraduate = count($graduatingStudents);
+
+
+
+
+
+
+
+include 'views/dashboard/dean_dashboard.php';
+}
+
+
+
+
+
+
+
+
+
 public function adviserDashboard() {
     // Get the current grading from campus_info table
     $stmt = $this->db->prepare("SELECT function FROM campus_info WHERE id = 8");
@@ -231,62 +385,6 @@ public function adviserDashboard() {
     }
 
 
-
-
-
-
-// public function registrarDashboard() {
-//     try {
-//         // Fetch counts and statistics
-//         $pendingCountStmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE role_id = 4 AND isActive = 0 AND isDelete = 0");
-//         $pendingCountStmt->execute();
-//         $pendingCount = $pendingCountStmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-//         $acceptedCountStmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE role_id = 4 AND isActive = 1 AND isDelete = 0");
-//         $acceptedCountStmt->execute();
-//         $acceptedCount = $acceptedCountStmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-//         // Fetch payment log
-//         $paymentLogStmt = $this->db->prepare("SELECT 
-//                CONCAT(
-//                     COALESCE(p.last_name, ''), ', ',
-//                     COALESCE(p.first_name, ''), ' ',
-//                     COALESCE(
-//                         CASE
-//                             WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
-//                             THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
-//                             ELSE ''
-//                         END, 
-//                         ''
-//                     )
-//                 ) AS fullname,
-//             pm.amount, 
-//             pm.date_pay 
-//             FROM payments pm
-//             LEFT JOIN enrollment_history eh on eh.id = pm.eh_id
-//             LEFT JOIN profiles p on p.profile_id = eh.user_id
-
-//             ORDER BY pm.date_pay DESC LIMIT 10");
-//         $paymentLogStmt->execute();
-//         $payment_log = $paymentLogStmt->fetchAll(PDO::FETCH_ASSOC);
-
-//         // Enrollment stats
-//         $stmt = $this->db->prepare("
-//             SELECT 
-//                 COUNT(eh.id) AS total_enrollments, 
-//                 SUM(CASE WHEN eh.status = 'ENROLLED' THEN 1 ELSE 0 END) AS total_enrolled,
-//                 SUM(CASE WHEN eh.status = 'Pending Payment' THEN 1 ELSE 0 END) AS pending_payment
-//             FROM enrollment_history eh
-//         ");
-//         $stmt->execute();
-//         $enrollmentStats = $stmt->fetch(PDO::FETCH_ASSOC);
-
-
-//      include 'views/dashboard/registrar_dashboard.php';
-//     } catch (Exception $e) {
-//         echo "Error loading dashboard: " . $e->getMessage();
-//     }
-// }
 
 
 
@@ -538,7 +636,7 @@ private function getEnrollmentStats() {
             $this->studentDashboard();
             break;
              case 7: //dean
-            $this->studentDashboard();
+            $this->deanDashboard();
             break;
        
 
@@ -548,7 +646,7 @@ private function getEnrollmentStats() {
 
 
 
-            default://Parents
+            default:
             $this->defaultDashboard();
             break;
         }

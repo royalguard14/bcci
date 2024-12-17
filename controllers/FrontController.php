@@ -7,6 +7,7 @@ class FrontController {
     public $campusDataEnrollmentStatus;
     public $myEnrollmentStatus;
     public $mycourseID;
+    public $myRoleID;
     
     public function __construct($db) {
         $this->db = $db;
@@ -15,7 +16,24 @@ class FrontController {
         }
     }
     protected function initializeUserDetails() {
+
+
+
+
         $userId = $_SESSION['user_id'];
+
+
+$stmt = $this->db->prepare("SELECT 
+role_id
+FROM users WHERE user_id = :user_id");
+
+$stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+$stmt->execute();
+$this->myRoleID = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+
+
         $stmt = $this->db->prepare("SELECT COUNT(*) AS record_count FROM academic_record WHERE user_id = :user_id");
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute();

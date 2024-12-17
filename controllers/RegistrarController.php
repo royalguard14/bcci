@@ -270,194 +270,275 @@ public function getDetailCOE() {
     // Check if ehID is passed
     if (isset($_GET['ehID'])) {
         $ehID = $_GET['ehID'];
-        
         try {
+
+
+        $stmt = $this->db->prepare("
+                SELECT
+                CONCAT(
+                    COALESCE(p.last_name, ''), ', ',
+                    COALESCE(p.first_name, ''), ' ',
+                    COALESCE(
+                        CASE
+                        WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+                        THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+                        ELSE ''
+                        END, 
+                        ''
+                        )
+                    ) AS fullname
+               
+                FROM profiles p
+
+                WHERE p.profile_id = :user_id
+        
+                ");
+            $stmt->bindParam(':user_id', $_SESSION['user_id']);
+            $stmt->execute();
+            $myNames = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
             // Query to fetch COE details along with subject and schedule information
             $stmt = $this->db->prepare("
                 SELECT
-                    CONCAT(
-                        COALESCE(p.last_name, ''), ', ',
-                        COALESCE(p.first_name, ''), ' ',
-                        COALESCE(
-                            CASE
-                                WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
-                                THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
-                                ELSE ''
-                            END, 
-                            ''
+                u.username,
+                p.sex,
+                CONCAT(
+                    COALESCE(p.last_name, ''), ', ',
+                    COALESCE(p.first_name, ''), ' ',
+                    COALESCE(
+                        CASE
+                        WHEN p.middle_name IS NOT NULL AND p.middle_name != '' 
+                        THEN CONCAT(SUBSTRING(p.middle_name, 1, 1), '.')
+                        ELSE ''
+                        END, 
+                        ''
                         )
                     ) AS fullname, 
-                    d.course_name as course_name,
-                    CONCAT(ay.start, '-', ay.end) AS acads_year, 
-                    eh.enrollment_date,
-                    eh.subjects_taken,
-                    eh.status,
-                    eh.semester_id,
-                    SUM(pmt.amount) AS total_payment
+                d.course_name as course_name,
+                CONCAT(ay.start, '-', ay.end) AS acads_year, 
+                eh.enrollment_date,
+                eh.subjects_taken,
+                eh.status,
+                eh.semester_id,
+                d.code as course_code,
+                SUM(pmt.amount) AS total_payment
                 FROM enrollment_history eh
+                LEFT JOIN users u ON u.user_id = eh.user_id
                 LEFT JOIN profiles p ON p.profile_id = eh.user_id
                 LEFT JOIN payments pmt ON pmt.eh_id = eh.id
                 LEFT JOIN department d ON d.id = eh.course_id
                 LEFT JOIN academic_year ay ON ay.id = eh.academic_year_id
                 WHERE eh.id = :ehID
                 GROUP BY eh.id
-            ");
+                ");
             $stmt->bindParam(':ehID', $ehID);
             $stmt->execute();
             $coeDetails = $stmt->fetch(PDO::FETCH_ASSOC);
-
             if ($coeDetails) {
                 // Decode subjects_taken into an array of subjects and schedules
                 $subjectsTaken = json_decode($coeDetails['subjects_taken'], true);
                 $subjectNames = [];
+                $subjectCodes = [];
                 $allSchedules = [];
+                $allunits = [];
                      $totalUnits = 0; // Initialize total units
-
                 // Fetch subject and schedule details for each subject and its scheduleIds
-                if ($subjectsTaken) {
-                    foreach ($subjectsTaken as $subject) {
+                     if ($subjectsTaken) {
+                        foreach ($subjectsTaken as $subject) {
                         // Fetch subject name using subjectId
-                        $subjectStmt = $this->db->prepare("
-                            SELECT 
+                            $subjectStmt = $this->db->prepare("
+                                SELECT 
                                 s.name AS subject_name,
-                                  s.unit_lec,
+                                s.code as code,
+                                s.unit_lec,
                                 s.unit_lab
-                            FROM subjects s
-                            WHERE s.id = :subject_id
-                        ");
-                        $subjectStmt->execute(['subject_id' => $subject['subjectId']]);
-                        $subjectData = $subjectStmt->fetch(PDO::FETCH_ASSOC);
+                                FROM subjects s
+                                WHERE s.id = :subject_id
+                                ");
+                            $subjectStmt->execute(['subject_id' => $subject['subjectId']]);
+                            $subjectData = $subjectStmt->fetch(PDO::FETCH_ASSOC);
 
-                        if ($subjectData) {
-                            $subjectNames[] = $subjectData['subject_name'];
-
+                            if ($subjectData) {
+                                $subjectNames[] = $subjectData['subject_name'];
+                                $subjectCodes[] = $subjectData['code'];
+                                $allunits[] = $subjectData['unit_lec'] + $subjectData['unit_lab'];
                                     // Calculate units for the subject
-                            $totalUnits += $subjectData['unit_lec'] + $subjectData['unit_lab'];
-
+                                $totalUnits += $subjectData['unit_lec'] + $subjectData['unit_lab'];
 
                             // Now fetch all schedules for each scheduleId in the scheduleIds array
-                            $scheduleDetails = [];
-                            foreach ($subject['scheduleIds'] as $scheduleId) {
-                                $scheduleStmt = $this->db->prepare("
-                                    SELECT
+                                $scheduleDetails = [];
+                                foreach ($subject['scheduleIds'] as $scheduleId) {
+                                    $scheduleStmt = $this->db->prepare("
+                                        SELECT
                                         sc.day,
                                         sc.time_slot,
                                         sc.session_type
-                                    FROM schedules sc
-                                    WHERE sc.id = :schedule_id
-                                ");
-                                $scheduleStmt->execute(['schedule_id' => $scheduleId]);
-                                $scheduleData = $scheduleStmt->fetch(PDO::FETCH_ASSOC);
-
-                                if ($scheduleData) {
+                                        FROM schedules sc
+                                        WHERE sc.id = :schedule_id
+                                        ");
+                                    $scheduleStmt->execute(['schedule_id' => $scheduleId]);
+                                    $scheduleData = $scheduleStmt->fetch(PDO::FETCH_ASSOC);
+                                    if ($scheduleData) {
                                     // Store schedule details for each scheduleId
-                                    $scheduleDetails[] = $scheduleData['day'] . ', ' . $scheduleData['time_slot'] ;
+                                        $scheduleDetails[] = $scheduleData['day'] . ', ' . $scheduleData['time_slot'] ;
+                                    }
                                 }
-                            }
-
                             // Combine all schedules for the subject and store it
-                            $allSchedules[] = implode('; ', $scheduleDetails);
+                                $allSchedules[] = implode('; ', $scheduleDetails);
+                            }
                         }
                     }
-                }
+
+
+
+$campusStmt = $this->db->prepare("
+    SELECT 
+        SUM(amount) as EnrollmentFeePaid, 
+        MAX(date_pay) as LastPayDate
+    FROM payments
+    WHERE eh_id = :eh_id
+    AND remark = 'enrolmentfee'
+");
+$campusStmt->bindParam(':eh_id', $ehID); // Correct variable name
+$campusStmt->execute();
+$result = $campusStmt->fetch(PDO::FETCH_ASSOC);
+
+$EnrollmentFeePaid = $result['EnrollmentFeePaid'];
+$LastPayDate = $result['LastPayDate'];
+$date = new DateTime($LastPayDate);
+$formattedDate = $date->format('M. d, Y');
+
 
 
 
 
  // Decode campus_info for fees
-$campusStmt = $this->db->prepare("
-    SELECT function
-    FROM campus_info
-    WHERE id = 8
-");
-$campusStmt->execute();
-$feesRow = $campusStmt->fetch(PDO::FETCH_ASSOC);
-
-if ($feesRow) {
+                    $campusStmt = $this->db->prepare("
+                        SELECT function
+                        FROM campus_info
+                        WHERE id = 8
+                        ");
+                    $campusStmt->execute();
+                    $feesRow = $campusStmt->fetch(PDO::FETCH_ASSOC);
+                    if ($feesRow) {
     // Decode the JSON string in the 'function' column
-    $fees = json_decode($feesRow['function'], true);
-
-    if ($fees) {
+                        $fees = json_decode($feesRow['function'], true);
+                        if ($fees) {
         $unitFee = $fees['unit_fee']; // Unit Fee
         $fixedFees = $fees['handling_fee'] + $fees['laboratory_fee'] + 
-                     $fees['miscellaneous_fee'] + $fees['other_fee'] + 
+        $fees['miscellaneous_fee'] + $fees['other_fee'] + 
                      $fees['registration_fee']; // Total Fixed Fees
-
         // Calculate the current assessment
-        $currentAssessment = ($totalUnits * $unitFee) + $fixedFees;
-
+                     $currentAssessment = ($totalUnits * $unitFee) + $fixedFees;
         // Include current assessment in the COE details
-        $coeDetails['current_assessment'] = $currentAssessment;
-    } else {
-        echo "Error: Unable to decode fees JSON.";
-    }
-} else {
-    echo "Error: Fees data not found.";
-}
-
-
+                     $coeDetails['current_assessment'] = $currentAssessment;
+                 } else {
+                    echo "Error: Unable to decode fees JSON.";
+                }
+            } else {
+                echo "Error: Fees data not found.";
+            }
 // Calculate each fee
-$handlingFee = $fees['handling_fee'];
-$laboratoryFee = $fees['laboratory_fee'];
-$miscellaneousFee = $fees['miscellaneous_fee'];
-$otherFee = $fees['other_fee'];
-$registrationFee = $fees['registration_fee'];
-$tuitionFee = $fees['unit_fee'] * $totalUnits;
+            $handlingFee = $fees['handling_fee'];
+            $laboratoryFee = $fees['laboratory_fee'];
+            $miscellaneousFee = $fees['miscellaneous_fee'];
+            $otherFee = $fees['other_fee'];
+            $registrationFee = $fees['registration_fee'];
+            $tuitionFee = $fees['unit_fee'] * $totalUnits;
 // Calculate total fee
-$totalFee = $handlingFee + $laboratoryFee + $miscellaneousFee + $otherFee + $registrationFee + $tuitionFee;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            $totalFee = $handlingFee + $laboratoryFee + $miscellaneousFee + $otherFee + $registrationFee + $tuitionFee;
                 // Add subjects and schedules to the COE details
-                $coeDetails['subject_names'] = implode(', ', $subjectNames);
-                $coeDetails['schedules'] = implode('; ', $allSchedules);
+            $coeDetails['subject_names'] = implode(', ', $subjectNames);
+            $coeDetails['schedules'] = implode('; ', $allSchedules);
 
-                #dd($coeDetails['schedules']);
+            // Convert subject codes to a single string, joined by commas
+$subjectCodesString = implode(", ", $subjectCodes);
+            $coeDetails['subject_codes'] = $subjectCodesString;
 
-                // Output the COE details
-                echo "<h4>Certificate of Employment</h4>";
-                echo "<p><strong>Name:</strong> " . htmlspecialchars($coeDetails['fullname']) . "</p>";
-                echo "<p><strong>Course:</strong> " . htmlspecialchars($coeDetails['course_name']) . "</p>";
-                echo "<p><strong>Academic Year:</strong> " . htmlspecialchars($coeDetails['acads_year']) . "</p>";
-                echo "<p><strong>Enrollment Date:</strong> " . htmlspecialchars($coeDetails['enrollment_date']) . "</p>";
-                echo "<p><strong>Status:</strong> " . htmlspecialchars($coeDetails['status']) . "</p>";
-                
+            $unitsCodesString = implode(", ", $allunits);
+            $coeDetails['subject_units'] = $unitsCodesString;
+
+
+            $semesterName = in_array($coeDetails['semester_id'], [1, 3, 5, 7]) ? '1st Semester' : '2nd Semester';
+            if ($coeDetails['semester_id'] == 1 || $coeDetails['semester_id'] == 2) {
+                $yearLevel = 'I';
+            } elseif ($coeDetails['semester_id'] == 3 || $coeDetails['semester_id'] == 4) {
+                $yearLevel = 'II';
+            } elseif ($coeDetails['semester_id'] == 5 || $coeDetails['semester_id'] == 6) {
+                $yearLevel = 'III';
+            } else {
+                $yearLevel = 'IV'; 
+            }
+            echo '
+            <section class="studentInfo">
+            <table>
+            <tr>
+            <td><strong>STUDENT INFORMATION</strong></td>
+            <td style="text-align:left;">ID NO : <br><strong>'. htmlspecialchars(ucwords($coeDetails['username'])) .'</strong></td>
+            <td style="text-align:left;">Academic Year: <br><strong>'. htmlspecialchars(ucwords($coeDetails['acads_year'])) .' | '.  $semesterName  .'</strong></td>
+            <td style="text-align:left;">GENDER: <br><strong>'. htmlspecialchars(
+                $coeDetails['sex'] === "M" ? "Male" : "Female"
+                ) .'</strong></td>
+            </tr>
+            <tr>
+            <td colspan="2" style="text-align:left;">Name (Last name, First name, Middle name, Suffix)<br><strong>'. htmlspecialchars(ucwords($coeDetails['fullname'])) .'</strong></td>
+            <td colspan="1" style="text-align:left;">COURSE/YR<br><strong>'. htmlspecialchars(ucwords($coeDetails['course_code'])) .' / '.$yearLevel.'</strong></td>
+            <td style="text-align:left; vertical-align: top;">Status:  <strong>OLD</strong></td>
+            </tr>
+            </table>
+            </section>
+            ';
                 // List Subjects and Schedules
-                echo "<h5>Subjects</h5>";
-echo "<table border='1' cellpadding='5'>
-        <tr><th>Subject</th><th>Schedule</th></tr>";
-
+            echo '<section class="course-info">
+           <table class="no-margin-no-padding">
+            <thead>
+            <tr><td colspan="6">Study Load</td>
+            </tr>
+            <tr>
+            <th>Subject Code</th>
+            <th>Subject Name</th>
+            <th>Units</th>
+            <th>Schedule</th>
+            </tr>
+            </thead>
+            <tbody>';
 $subjectNames = explode(', ', $coeDetails['subject_names']);  // Split the subjects into an array
 $allSchedules = explode('; ', $coeDetails['schedules']);  // Split the schedules into an array
+$allcodes = explode(', ', $coeDetails['subject_codes']);
+$uns = explode(', ', $coeDetails['subject_units']);
 
+
+                   $campusStmt = $this->db->prepare("
+                        SELECT function
+                        FROM campus_info
+                        WHERE id = 10
+                        ");
+                    $campusStmt->execute();
+                    $schooldirector = $campusStmt->fetch(PDO::FETCH_ASSOC);
 $subjectIndex = 0;  // Initialize subject index
 
-foreach ($subjectNames as $subject) {
+
+foreach ($subjectNames as $index => $subject) {
     // Initialize the schedule list for this subject
     $subjectSchedules = [];
-
     // Continue adding schedules for this subject
     // Loop through all schedules, adding schedules based on the subject
     while ($subjectIndex < count($allSchedules) && count($subjectSchedules) < 2) {
         $subjectSchedules[] = $allSchedules[$subjectIndex];
         $subjectIndex++;
     }
+    
+    // Get the subject code from the $allcodes array using the current index
+    $subjectCode = isset($allcodes[$index]) ? $allcodes[$index] : '';
+    $subjUnits = isset($uns[$index]) ? $uns[$index] : '';
 
-    // Display subject and its schedules in a list format
-    echo "<tr><td>$subject</td><td><ul>";
+    // Display subject code and its schedules in a list format
+    echo "<tr >
+        <td class='small-font'>$subjectCode</td>
+        <td class='small-font'>$subject</td>
+        <td class='small-font'>$subjUnits</td>
+        <td class='small-font'><ul>";
 
     // Loop through the schedules for this subject and display them
     foreach ($subjectSchedules as $schedule) {
@@ -466,33 +547,167 @@ foreach ($subjectNames as $subject) {
 
     echo "</ul></td></tr>";
 }
+echo '    <tfoot>
+        <td colspan="2" style="text-align:right">Total Units: </td>
+        <td colspan="12" >'.$totalUnits.'</td>
+    </tfoot>';
 
 echo "</table>";
-
-
-
     // Display the fee breakdown
-echo "<h3>Fee Breakdown</h3>";
-echo "<ul>";
-echo "<li>Handling Fee: ₱" . number_format($handlingFee, 2) . "</li>";
-echo "<li>Laboratory Fee: ₱" . number_format($laboratoryFee, 2) . "</li>";
-echo "<li>Miscellaneous Fee: ₱" . number_format($miscellaneousFee, 2) . "</li>";
-echo "<li>Other Fee: ₱" . number_format($otherFee, 2) . "</li>";
-echo "<li>Registration Fee: ₱" . number_format($registrationFee, 2) . "</li>";
-echo "<li>Tuition Fee: ₱" . number_format($tuitionFee, 2) . "</li>";
-echo "</ul>";
-echo "<h4>Total Fee: ₱" . number_format($totalFee, 2) . "</h4>";
-                echo "<p><strong>Total Payment:</strong> ₱" . number_format($coeDetails['total_payment'], 2) . "</p>";
-            } else {
-                echo "<p>No details found for this enrollment.</p>";
-            }
 
-        } catch (Exception $e) {
-            echo "Error: " . $e->getMessage();
-        }
-    }
+
+
+$currentDateTime = date('Y-m-d'); // Format: YYYY-MM-DD HH:MM:SS
+
+echo '
+<section class="payments">
+   <table>
+       <tbody>
+
+        <tr>
+            <td>Schedule of Payment</td>
+            <td>Term</td>
+            <td>Assessment</td>
+            <td>OLDAcc/Bridging/Tutorial</td>
+            <td>Total</td>
+            <td>EXAM PERMIT <br> 2425-1-253</td>
+        </tr>
+        <tr>
+
+        </tr>
+        <tr>
+            <td style="width: fit-content;">09/09/2024 - 09/13/2024 <br> 10/07/2024 - 10/11/2024 <br> 11/11/2024 - 11/15/2024 <br> 12/09/2024 - 12/13/2024</td>
+            <td style="text-align:center;">Prelim<br>Midterm<br>PreFinal<br>Final</td>
+ 
+<td style="text-align:center;">
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.4477, 2).'<br>
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.2123, 2).'<br>
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.2123, 2).'<br>
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.1592, 2).'
+</td>
+
+
+
+
+
+            <td style="text-align:center;">0.00<br>0.00<br>0.00<br>0.00</td>
+     <td style="text-align:center;">
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.4477, 2).'<br>
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.2123, 2).'<br>
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.2123, 2).'<br>
+    '.number_format(($totalFee - $EnrollmentFeePaid) * 0.1592, 2).'
+</td>
+            <td rowspan=""><strong>Prelim</strong></td>
+        </tr>
+      <tr>
+    <td colspan="5" style="text-align: center; font-weight: bold;">Assessment Details</td>
+    <td rowspan="2" style="text-align: center; vertical-align: middle; font-weight: bold;">
+        Midterm
+    </td>
+</tr>
+<tr>
+    <td colspan="3" style="white-space: pre; text-align: left; vertical-align: top;">
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Current Assessment:</strong></span>
+            <span>'. number_format($totalFee, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Current Payments</strong><br>
+           Date: '. $formattedDate .' : '. number_format($EnrollmentFeePaid, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Current Balance:</strong></span>
+            <span>'. number_format($totalFee - $EnrollmentFeePaid, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>OLD ACCOUNTS:</strong></span>
+            <span>0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>TOTAL ACCOUNTS:</strong></span>
+            <span>'. number_format($totalFee - $EnrollmentFeePaid, 2) .'</span>
+        </div>
+        <div style="display: flex;">
+            <span><strong>PAYABLE</strong><br>
+            Date Issued: '.(new DateTime('2024-12-17'))->format('F d, Y').'</span>
+        </div>
+    </td>
+    <td colspan="2" style="white-space: pre; text-align: left; vertical-align: top;">
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Handling fee:</strong></span>
+            <span>'. number_format($handlingFee, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Laboratory fee:</strong></span>
+            <span>'. number_format($laboratoryFee, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Miscellaneous fee:</strong></span>
+            <span>'. number_format($miscellaneousFee, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Other fee:</strong></span>
+            <span>'. number_format($otherFee, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Registration fee:</strong></span>
+            <span>'. number_format($registrationFee, 2) .'</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span><strong>Tuition fee:</strong></span>
+            <span>'. number_format($tuitionFee, 2) .'</span>
+        </div>
+    </td>
+</tr>
+
+        <tr>
+<td>DATE RELEASED <br> '.$currentDateTime.'</td>
+<td>SCHOOL DIRECTOR: <br> <br> <br>'.ucwords($schooldirector['function']).'</td>
+<td>CONFORME: <br> <br> <br>'.ucwords($coeDetails['fullname']).'</td>
+<td>REGISTRAR: <br> <br> <br>'.ucwords($myNames).'</td>
+<td>ACCOUNTING: <br> <br> <br></td>
+<td rowspan="1"><strong>PreFinal</strong></td>
+        </tr>
+        <tr>
+           <td colspan="5"><strong>END OF CERTIFICATE</strong></td> 
+           <td style="vertical-align: middle;"><strong>Final</strong><br><br><br></td>
+        </tr>
+    </tbody>
+</table>
+</section>
+
+';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+} else {
+    echo "<p>No details found for this enrollment.</p>";
 }
-
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+}
+}
 
 
 
