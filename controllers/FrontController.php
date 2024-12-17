@@ -29,7 +29,7 @@ FROM users WHERE user_id = :user_id");
 
 $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
 $stmt->execute();
-$this->myRoleID = $stmt->fetch(PDO::FETCH_ASSOC);
+$this->myRoleID = (int)$stmt->fetch(PDO::FETCH_ASSOC)['role_id'];
 
 
 

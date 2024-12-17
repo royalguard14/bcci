@@ -147,8 +147,15 @@ $routes = [
 'addInstructors' => ['controller' => 'DeanController', 'action' => 'addInstrutors'],
 'remove-teacher-from-dept' => ['controller' => 'DeanController', 'action' => 'removeInstrutors'],
 
+'fetchSchedule' => ['controller' => 'DeanController', 'action' => 'fetchSchedule'],
+'updateAdviser' => ['controller' => 'DeanController', 'action' => 'updateAdviser'],
 
 
+'mysched' => ['controller' => 'AdviserController', 'action' => 'mysched'],
+'gradestudent' => ['controller' => 'AdviserController', 'action' => 'gradestudent'],
+'gradingsubject' => ['controller' => 'AdviserController', 'action' => 'gradingsubject'],
+'grade' => ['controller' => 'AdviserController', 'action' => 'grade'],
+'updategrade' => ['controller' => 'AdviserController', 'action' => 'updategrade'],
 
     
     

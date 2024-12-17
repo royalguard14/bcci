@@ -15,6 +15,7 @@ class BaseController {
     protected $acads_report;
 
     protected $campusDataCurrentAcademicYear;
+    protected $campusDataCurrentTerm;
     protected $campusDataEnrollmentStatus;
     protected $myEnrollmentStatus;
     protected $mycourseID;
@@ -189,14 +190,14 @@ if ($result) {
 }
 
 
-if ($this->myRoleID == 7) {
+
 $stmt = $this->db->prepare("SELECT 
 role_id
 FROM users WHERE user_id = :user_id");
+
 $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
 $stmt->execute();
-$this->myRoleID = $stmt->fetch(PDO::FETCH_ASSOC);
-}
+$this->myRoleID = (int)$stmt->fetch(PDO::FETCH_ASSOC)['role_id'];
 
 $stmt = $this->db->prepare("SELECT 
     CONCAT(
@@ -237,12 +238,13 @@ if ($this->myName) {
         $course_id = $stmt->fetch(PDO::FETCH_ASSOC);
         $this->mycourseID = $course_id ? (int) $course_id['c_id'] : null;
 
-        $stmt = $this->db->prepare("SELECT function, name FROM campus_info WHERE id IN (5,7,2) ORDER BY FIELD(id, 5, 7, 2);");
+        $stmt = $this->db->prepare("SELECT function, name FROM campus_info WHERE id IN (5,7,2,9) ORDER BY FIELD(id, 5, 7, 2, 9);");
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $this->campusDataCurrentAcademicYear = (int) $result[0]['function'];
         $this->campusDataEnrollmentStatus = (int) $result[1]['function'];
         $this->campusName = $result[2]['function'];
+        $this->campusDataCurrentTerm = (int)$result[3]['function'];
 
         $stmt = $this->db->prepare("
             SELECT COUNT(*) AS record_count 

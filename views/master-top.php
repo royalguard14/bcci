@@ -48,71 +48,61 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
           </ul>
         </div>
         <!-- Right navbar links -->
-        <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-
-
-          <?php if (!isset($_SESSION['log_in'])): ?>
-                      <!-- Home Link -->
-          <li class="nav-item">
-            <a href="home" class="nav-link <?= ($current_page == 'home') ? 'active' : ''; ?>">Home</a>
-          </li>
-
-          <!-- Contact Us Link -->
-          <li class="nav-item">
-            <a href="contact" class="nav-link <?= ($current_page == 'contact') ? 'active' : ''; ?>">Contact Us</a>
-          </li>
-          <!-- Guest Links -->
-          <li class="nav-item">
-            <a href="register" class="nav-link <?= ($current_page == 'register') ? 'active' : ''; ?>">Enroll Now!</a>
-          </li>
-          <li class="nav-item">
-            <a href="login" class="nav-link <?= ($current_page == 'login') ? 'active' : ''; ?>">Login</a>
-          </li>
-          <?php else: ?>
-          <?php if ($this->acads_report <= 0 &&  $this->myRoleID == 4): ?>
-          <!-- Academic Setup for Logged-in Users Without Records -->
-          <li class="nav-item">
-            <a href="acad_setting" class="nav-link <?= ($current_page == 'acad_setting') ? 'active' : ''; ?>">Academic Setup</a>
-          </li>
-          <?php else: ?>
-          <?php if ($this->myEnrollmentStatus <= 0 && $this->campusDataEnrollmentStatus == 1 && $this->myRoleID == 4): ?>
-          <li class="nav-item">
-            <a href="addsubject" class="nav-link <?= ($current_page == 'addsubject') ? 'active' : ''; ?>">Choose Subject</a>
-          </li>
-          <?php endif; ?>
-           <?php if ($this->myRoleID == 4): ?>
-          <li class="nav-item">
-            <a href="profile" class="nav-link <?= ($current_page == 'profile') ? 'active' : ''; ?>">My Profile</a>
-          </li>
-
-                   <li class="nav-item dropdown">
-            <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Records</a>
-            <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
-              <li><a href="enrollment-history" class="dropdown-item">Enrollment History </a></li>
-              <li class="dropdown-divider"></li>
-
-              <li><a href="academic-record" class="dropdown-item">Academic Records</a></li>
-              <li class="dropdown-divider"></li>
-               <li><a href="academic-payment" class="dropdown-item">Payment</a></li>
-         
-            </ul>
-
-          </li>
-
+<ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+    <?php if (!isset($_SESSION['log_in'])): ?>
+        <!-- Guest Links -->
         <li class="nav-item">
-            <a href="documents" class="nav-link <?= ($current_page == 'documents') ? 'active' : ''; ?>">Documents</a>
-          </li>
+            <a href="home" class="nav-link <?= ($current_page == 'home') ? 'active' : ''; ?>">Home</a>
+        </li>
+        <li class="nav-item">
+            <a href="contact" class="nav-link <?= ($current_page == 'contact') ? 'active' : ''; ?>">Contact Us</a>
+        </li>
+        <li class="nav-item">
+            <a href="register" class="nav-link <?= ($current_page == 'register') ? 'active' : ''; ?>">Enroll Now!</a>
+        </li>
+        <li class="nav-item">
+            <a href="login" class="nav-link <?= ($current_page == 'login') ? 'active' : ''; ?>">Login</a>
+        </li>
+    <?php else: ?>
+        <!-- Academic Setup for Users Without Records -->
+        <?php if ($this->acads_report <= 0 && $this->myRoleID == 4): ?>
+            <li class="nav-item">
+                <a href="acad_setting" class="nav-link <?= ($current_page == 'acad_setting') ? 'active' : ''; ?>">Academic Setup</a>
+            </li>
+        <?php elseif ($this->myEnrollmentStatus <= 0 && $this->campusDataEnrollmentStatus == 1 && $this->myRoleID == 4): ?>
+            <!-- Subject Selection -->
+            <li class="nav-item">
+                <a href="addsubject" class="nav-link <?= ($current_page == 'addsubject') ? 'active' : ''; ?>">Choose Subject</a>
+            </li>
+        <?php endif; ?>
+  
+        <?php if ($this->myRoleID === 4): ?>
+            <!-- Student-Specific Links -->
+            <li class="nav-item">
+                <a href="profile" class="nav-link <?= ($current_page == 'profile') ? 'active' : ''; ?>">My Profile</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Records</a>
+                <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                    <li><a href="enrollment-history" class="dropdown-item">Enrollment History</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li><a href="academic-record" class="dropdown-item">Academic Records</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li><a href="academic-payment" class="dropdown-item">Payment</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="documents" class="nav-link <?= ($current_page == 'documents') ? 'active' : ''; ?>">Documents</a>
+            </li>
+        <?php endif; ?>
 
-
-  <?php endif; ?>
-          <?php endif; ?>
-
-          <!-- Logout Link -->
-          <li class="nav-item">
+        <!-- Logout Link -->
+        <li class="nav-item">
             <a href="logout" class="nav-link <?= ($current_page == 'logout') ? 'active' : ''; ?>">Logout</a>
-          </li>
-          <?php endif; ?>
-        </ul>
+        </li>
+    <?php endif; ?>
+</ul>
+
       </div>
     </nav>
     <!-- /.navbar -->

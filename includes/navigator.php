@@ -148,6 +148,16 @@ $(document).ready(function() {
               </p>
             </a>
           </li>
+
+                  <li class="nav-item">
+            <a href="fetchSchedule" class="nav-link <?= ($current_page == 'fetchSchedule') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Schedules
+               
+              </p>
+            </a>
+          </li>
 <?php endif; ?>
 
 <?php if ($_SESSION['role_id'] === 5): ?>
@@ -186,7 +196,17 @@ $(document).ready(function() {
 
  <?php endif; ?>
 
+ <?php if ($_SESSION['role_id'] === 3): ?>
+                 <li class="nav-item">
+            <a href="mysched" class="nav-link <?= ($current_page == 'mysched') ? 'active' : ''; ?>">
+              <i class="nav-icon fas fa-calendar-day"></i>
+              <p>
+                My Schedule
+              </p>
+            </a>
+          </li>
 
+ <?php endif; ?>
   </ul>
 </nav>
 <!-- /.sidebar-menu -->
