@@ -32,7 +32,7 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
               <i class="nav-icon fas fa-users"></i>
               <p>
                 Enrollies
-                <span class="badge badge-info right">2</span>
+                <span class="badge badge-info right">0</span>
               </p>
             </a>
           </li>
