@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 13, 2024 at 02:21 PM
+-- Generation Time: Dec 19, 2024 at 10:46 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.0
 
@@ -39,7 +39,8 @@ CREATE TABLE `academic_record` (
 --
 
 INSERT INTO `academic_record` (`id`, `c_id`, `status`, `user_id`) VALUES
-(6, 1, NULL, 8);
+(6, 1, NULL, 8),
+(7, 1, NULL, 5);
 
 -- --------------------------------------------------------
 
@@ -100,7 +101,10 @@ INSERT INTO `campus_info` (`id`, `name`, `function`) VALUES
 (4, 'Operating Time', '6:00AM-9:00PM'),
 (5, 'Academic Year', '1'),
 (6, 'Institutional Email', 'bxucity.edu.ph'),
-(7, 'Enrollment', '1');
+(7, 'Enrollment', '1'),
+(8, 'Payment Setting', '{\"unit_fee\":\"201\",\"handling_fee\":\"1202\",\"laboratory_fee\":\"5700\",\"miscellaneous_fee\":\"4750\",\"other_fee\":\"17758\",\"registration_fee\":\"1950\"}'),
+(9, 'Terms', '1'),
+(10, 'SCHOOL DIRECTOR', 'Ghaizar A. Bautista');
 
 -- --------------------------------------------------------
 
@@ -128,6 +132,27 @@ INSERT INTO `department` (`id`, `course_name`, `code`, `room_ids`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `employment_info`
+--
+
+CREATE TABLE `employment_info` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `course_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `employment_info`
+--
+
+INSERT INTO `employment_info` (`id`, `user_id`, `course_id`) VALUES
+(5, 7, 1),
+(10, 3, 1),
+(11, 9, 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `enrollment_history`
 --
 
@@ -142,6 +167,13 @@ CREATE TABLE `enrollment_history` (
   `enrollment_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `enrollment_history`
+--
+
+INSERT INTO `enrollment_history` (`id`, `user_id`, `course_id`, `semester_id`, `subjects_taken`, `status`, `academic_year_id`, `enrollment_date`) VALUES
+(1, 8, 1, 1, '[{\"subjectId\":\"1\",\"scheduleIds\":[1,2]},{\"subjectId\":\"2\",\"scheduleIds\":[3,4]},{\"subjectId\":\"3\",\"scheduleIds\":[5,6]},{\"subjectId\":\"4\",\"scheduleIds\":[7,8]},{\"subjectId\":\"5\",\"scheduleIds\":[9,10]},{\"subjectId\":\"34\",\"scheduleIds\":[11,12]},{\"subjectId\":\"38\",\"scheduleIds\":[13,14]},{\"subjectId\":\"132\",\"scheduleIds\":[15,16]}]', 'ENROLLED', 1, '2024-12-14');
+
 -- --------------------------------------------------------
 
 --
@@ -153,10 +185,21 @@ CREATE TABLE `grade_records` (
   `user_id` int(11) NOT NULL,
   `eh_id` int(11) NOT NULL,
   `subject_id` int(11) NOT NULL,
+  `term_id` int(11) NOT NULL,
   `grade` decimal(5,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `grade_records`
+--
+
+INSERT INTO `grade_records` (`id`, `user_id`, `eh_id`, `subject_id`, `term_id`, `grade`, `created_at`, `updated_at`) VALUES
+(1, 8, 1, 1, 1, '90.52', '2024-12-16 00:49:06', '2024-12-17 18:03:57'),
+(2, 8, 1, 1, 2, '90.00', '2024-12-16 00:49:06', '2024-12-16 00:49:06'),
+(6, 8, 1, 1, 3, '70.00', '2024-12-17 17:24:22', '2024-12-17 17:24:22'),
+(7, 8, 1, 1, 4, '71.00', '2024-12-17 17:24:41', '2024-12-17 17:40:00');
 
 -- --------------------------------------------------------
 
@@ -172,6 +215,31 @@ CREATE TABLE `messages` (
   `is_read` tinyint(1) DEFAULT 0,
   `sent_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL,
+  `eh_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `date_pay` datetime NOT NULL,
+  `remark` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `eh_id`, `amount`, `date_pay`, `remark`) VALUES
+(1, 1, '150.00', '2024-12-14 07:10:26', 'enrolmentfee'),
+(2, 1, '300.00', '2024-12-14 07:12:34', 'enrolmentfee'),
+(11, 1, '232.00', '2024-12-17 13:29:03', 'enrolmentfee'),
+(12, 1, '1000.00', '2024-12-17 13:29:21', 'enrolmentfee'),
+(14, 1, '500.00', '2024-12-17 13:34:04', '');
 
 -- --------------------------------------------------------
 
@@ -197,6 +265,7 @@ INSERT INTO `permissions` (`permission_id`, `permission_name`) VALUES
 (8, 'Manage Payments'),
 (2, 'Manage Permissions'),
 (1, 'Manage Roles'),
+(15, 'Manage Teacher'),
 (3, 'Manage Users'),
 (13, 'Student Access'),
 (14, 'System Management'),
@@ -230,8 +299,15 @@ CREATE TABLE `profiles` (
 --
 
 INSERT INTO `profiles` (`id`, `photo_path`, `profile_id`, `last_name`, `first_name`, `middle_name`, `sex`, `birth_date`, `house_street_sitio_purok`, `barangay`, `municipality_city`, `province`, `contact_number`, `created_at`) VALUES
-(1, 'assets/documents/43614647/bautista.jpg', 8, 'bautista', 'Ghaizar', 'Atara', 'M', '1993-10-13', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-12 03:40:44'),
-(2, 'assets/documents/13917692/photo_6244355151410348798_y.jpg', 9, 'bautistaa', 'Ghaizar', 'Atara', 'M', '1993-10-16', 'Purok 3 Upper', 'Doongan', 'Butuan', 'Agusan Del Norte', '09277294457', '2024-12-12 06:59:04');
+(1, NULL, 1, 'Smith', 'John', 'A.', 'M', '1990-01-01', 'Street 1', 'Barangay 1', 'City 1', 'Province 1', '09123456789', '2024-12-17 04:54:29'),
+(2, NULL, 2, 'Doe', 'Jane', 'B.', 'F', '1991-02-02', 'Street 2', 'Barangay 2', 'City 2', 'Province 2', '09234567890', '2024-12-17 04:54:29'),
+(3, NULL, 3, 'Brown', 'Michael', 'C.', 'M', '1992-03-03', 'Street 3', 'Barangay 3', 'City 3', 'Province 3', '09345678901', '2024-12-17 04:54:29'),
+(4, NULL, 4, 'Davis', 'Emily', 'D.', 'F', '1993-04-04', 'Street 4', 'Barangay 4', 'City 4', 'Province 4', '09456789012', '2024-12-17 04:54:29'),
+(5, NULL, 5, 'Wilson', 'Daniel', 'E.', 'M', '1994-05-05', 'Street 5', 'Barangay 5', 'City 5', 'Province 5', '09567890123', '2024-12-17 04:54:29'),
+(6, NULL, 6, 'Anderson', 'Anna', 'F.', 'F', '1995-06-06', 'Street 6', 'Barangay 6', 'City 6', 'Province 6', '09678901234', '2024-12-17 04:54:29'),
+(7, NULL, 7, 'Thomas', 'David', 'G.', 'M', '1996-07-07', 'Street 7', 'Barangay 7', 'City 7', 'Province 7', '09789012345', '2024-12-17 04:54:29'),
+(8, NULL, 8, 'Taylor', 'Jessica', 'H.', 'F', '1997-08-08', 'Street 8', 'Barangay 8', 'City 8', 'Province 8', '09890123456', '2024-12-17 04:54:29'),
+(9, NULL, 9, 'Moore', 'James', 'I.', 'M', '1998-09-09', 'Street 9', 'Barangay 9', 'City 9', 'Province 9', '09901234567', '2024-12-17 04:54:29');
 
 -- --------------------------------------------------------
 
@@ -256,7 +332,7 @@ INSERT INTO `roles` (`role_id`, `role_name`, `permission_id`) VALUES
 (4, 'Student', '13'),
 (5, 'Accounting Staff', '8,9'),
 (6, 'Auditor', '10,9'),
-(7, 'Dean', '');
+(7, 'Dean', '15');
 
 -- --------------------------------------------------------
 
@@ -304,16 +380,16 @@ CREATE TABLE `schedules` (
 --
 
 INSERT INTO `schedules` (`id`, `academic_id`, `course_id`, `semester`, `subject_id`, `day`, `time_slot`, `session_type`, `adviser`, `batch`) VALUES
-(1, 1, 1, '1', 1, 'Thursday', '07:30AM-09:00AM', 'Lecture', NULL, 1),
-(2, 1, 1, '1', 1, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
-(3, 1, 1, '1', 2, 'Monday', '04:30PM-06:00PM', 'Lecture', NULL, 1),
-(4, 1, 1, '1', 2, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
-(5, 1, 1, '1', 3, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL, 1),
-(6, 1, 1, '1', 3, 'Friday', '01:30PM-03:00PM', 'Lecture', NULL, 1),
-(7, 1, 1, '1', 4, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
-(8, 1, 1, '1', 4, 'Thursday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
-(9, 1, 1, '1', 5, 'Friday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
-(10, 1, 1, '1', 5, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 1),
+(1, 1, 1, '1', 1, 'Thursday', '07:30AM-09:00AM', 'Lecture', 9, 1),
+(2, 1, 1, '1', 1, 'Saturday', '10:30AM-12:00PM', 'Lecture', 9, 1),
+(3, 1, 1, '1', 2, 'Monday', '04:30PM-06:00PM', 'Lecture', 9, 1),
+(4, 1, 1, '1', 2, 'Saturday', '06:00AM-07:30AM', 'Lecture', 9, 1),
+(5, 1, 1, '1', 3, 'Tuesday', '12:00PM-01:30PM', 'Lecture', 3, 1),
+(6, 1, 1, '1', 3, 'Friday', '01:30PM-03:00PM', 'Lecture', 3, 1),
+(7, 1, 1, '1', 4, 'Thursday', '09:00AM-10:30AM', 'Lecture', 9, 1),
+(8, 1, 1, '1', 4, 'Thursday', '06:00AM-07:30AM', 'Lecture', 9, 1),
+(9, 1, 1, '1', 5, 'Friday', '03:00PM-04:30PM', 'Lecture', 3, 1),
+(10, 1, 1, '1', 5, 'Monday', '03:00PM-04:30PM', 'Lecture', 3, 1),
 (11, 1, 1, '1', 34, 'Thursday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
 (12, 1, 1, '1', 34, 'Wednesday', '06:00PM-07:30PM', 'Lecture', NULL, 1),
 (13, 1, 1, '1', 38, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 1),
@@ -392,12 +468,12 @@ INSERT INTO `schedules` (`id`, `academic_id`, `course_id`, `semester`, `subject_
 (86, 1, 2, '2', 40, 'Saturday', '10:30AM-12:00PM', 'Lecture', NULL, 1),
 (87, 1, 2, '2', 41, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
 (88, 1, 2, '2', 41, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 1),
-(89, 1, 1, '1', 1, 'Monday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
-(90, 1, 1, '1', 1, 'Thursday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
-(91, 1, 1, '1', 2, 'Tuesday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
-(92, 1, 1, '1', 3, 'Saturday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
-(93, 1, 1, '1', 4, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
-(94, 1, 1, '1', 4, 'Wednesday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
+(89, 1, 1, '1', 1, 'Monday', '03:00PM-04:30PM', 'Lecture', 9, 2),
+(90, 1, 1, '1', 1, 'Thursday', '12:00PM-01:30PM', 'Lecture', 9, 2),
+(91, 1, 1, '1', 2, 'Tuesday', '12:00PM-01:30PM', 'Lecture', 9, 2),
+(92, 1, 1, '1', 3, 'Saturday', '07:30AM-09:00AM', 'Lecture', 9, 2),
+(93, 1, 1, '1', 4, 'Monday', '09:00AM-10:30AM', 'Lecture', 9, 2),
+(94, 1, 1, '1', 4, 'Wednesday', '10:30AM-12:00PM', 'Lecture', 9, 2),
 (95, 1, 1, '1', 5, 'Thursday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
 (96, 1, 1, '1', 5, 'Monday', '10:30AM-12:00PM', 'Lecture', NULL, 2),
 (97, 1, 1, '1', 34, 'Saturday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
@@ -406,8 +482,8 @@ INSERT INTO `schedules` (`id`, `academic_id`, `course_id`, `semester`, `subject_
 (100, 1, 1, '1', 38, 'Tuesday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
 (101, 1, 1, '1', 132, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
 (102, 1, 1, '1', 132, 'Saturday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
-(103, 1, 1, '2', 6, 'Saturday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
-(104, 1, 1, '2', 6, 'Tuesday', '01:30PM-03:00PM', 'Lecture', NULL, 2),
+(103, 1, 1, '2', 6, 'Saturday', '06:00AM-07:30AM', 'Lecture', 3, 2),
+(104, 1, 1, '2', 6, 'Tuesday', '01:30PM-03:00PM', 'Lecture', 3, 2),
 (105, 1, 1, '2', 7, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
 (106, 1, 1, '2', 7, 'Saturday', '07:30PM-09:00PM', 'Lecture', NULL, 2),
 (107, 1, 1, '2', 8, 'Friday', '04:30PM-06:00PM', 'Lecture', NULL, 2),
@@ -475,14 +551,14 @@ INSERT INTO `schedules` (`id`, `academic_id`, `course_id`, `semester`, `subject_
 (169, 1, 2, '2', 40, 'Monday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
 (170, 1, 2, '2', 41, 'Tuesday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
 (171, 1, 2, '2', 41, 'Wednesday', '12:00PM-01:30PM', 'Lecture', NULL, 2),
-(172, 1, 1, '1', 1, 'Tuesday', '06:00AM-07:30AM', 'Lecture', NULL, 3),
-(173, 1, 1, '1', 1, 'Monday', '01:30PM-03:00PM', 'Lecture', NULL, 3),
-(174, 1, 1, '1', 2, 'Wednesday', '09:00AM-10:30AM', 'Lecture', NULL, 2),
-(175, 1, 1, '1', 2, 'Wednesday', '07:30AM-09:00AM', 'Lecture', NULL, 2),
-(176, 1, 1, '1', 3, 'Monday', '06:00AM-07:30AM', 'Lecture', NULL, 2),
-(177, 1, 1, '1', 3, 'Tuesday', '03:00PM-04:30PM', 'Lecture', NULL, 2),
-(178, 1, 1, '1', 4, 'Wednesday', '06:00AM-07:30AM', 'Lecture', NULL, 3),
-(179, 1, 1, '1', 4, 'Friday', '10:30AM-12:00PM', 'Lecture', NULL, 3),
+(172, 1, 1, '1', 1, 'Tuesday', '06:00AM-07:30AM', 'Lecture', 9, 3),
+(173, 1, 1, '1', 1, 'Monday', '01:30PM-03:00PM', 'Lecture', 9, 3),
+(174, 1, 1, '1', 2, 'Wednesday', '09:00AM-10:30AM', 'Lecture', 9, 2),
+(175, 1, 1, '1', 2, 'Wednesday', '07:30AM-09:00AM', 'Lecture', 9, 2),
+(176, 1, 1, '1', 3, 'Monday', '06:00AM-07:30AM', 'Lecture', 9, 2),
+(177, 1, 1, '1', 3, 'Tuesday', '03:00PM-04:30PM', 'Lecture', 9, 2),
+(178, 1, 1, '1', 4, 'Wednesday', '06:00AM-07:30AM', 'Lecture', 9, 3),
+(179, 1, 1, '1', 4, 'Friday', '10:30AM-12:00PM', 'Lecture', 9, 3),
 (180, 1, 1, '1', 5, 'Tuesday', '07:30PM-09:00PM', 'Lecture', NULL, 3),
 (181, 1, 1, '1', 5, 'Thursday', '09:00AM-10:30AM', 'Lecture', NULL, 3),
 (182, 1, 1, '1', 34, 'Monday', '07:30AM-09:00AM', 'Lecture', NULL, 3),
@@ -632,9 +708,9 @@ CREATE TABLE `subjects` (
 --
 
 INSERT INTO `subjects` (`id`, `name`, `description`, `code`, `unit_lec`, `unit_lab`, `pre_req`) VALUES
-(1, 'Understanding the Self', '', 'GE 1', 3, 0, ''),
+(1, 'Understanding the Self', '', 'GE 1', 3, 0, NULL),
 (2, 'Reading in the Philippine History', '', 'GE 2', 3, 0, ''),
-(3, 'The Contemporary World', '', 'GE 3', 3, 0, '9,10'),
+(3, 'The Contemporary World', '', 'GE 3', 3, 0, ''),
 (4, 'Ang Kulikulum ng Filipino sa Batayang Antas ng Edukasyon', '', 'FIL 1', 3, 0, ''),
 (5, 'PATHFit 1: Movement Competency Training', '', 'PE 1', 3, 0, ''),
 (6, 'Purposive Communication', '', 'GE 5', 3, 0, ''),
@@ -763,7 +839,7 @@ INSERT INTO `subjects` (`id`, `name`, `description`, `code`, `unit_lec`, `unit_l
 (129, 'Computer Programming 1', '', 'IT 102', 2, 1, ''),
 (130, 'Speech and Oral Communication', '', 'IT Ins 101', 2, 1, ''),
 (131, 'Movement Comptency Training', '', 'PATHFit 1', 2, 0, ''),
-(132, 'Civic Welfare Training Services 1', '', 'NSPT 1', 3, 0, ''),
+(132, 'Civic Welfare Training Services 1', '', 'NSTP 1', 3, 0, ''),
 (134, 'Discrete Mathematics', '', 'IT 103', 3, 0, ''),
 (135, 'Computer Programming 2', '', 'IT 104', 2, 1, ''),
 (136, 'Intro to Human Computer Interaction', '', 'IT 105', 2, 2, ''),
@@ -829,9 +905,9 @@ INSERT INTO `users` (`user_id`, `email`, `username`, `password`, `role_id`, `isA
 (4, '', 'student1', '$2y$10$vpb/MIhDVc.Z0Jvm7oiji.dWvXGEWHuyykVCiGDKQ/6UF3s30mOEy', 4, 1, 0, NULL, '2024-12-02 00:39:27', '2024-12-12 03:34:57'),
 (5, '', 'student2', '$2y$10$.YGT/Bw6BL6V9TSiRXaQAebrUP.krIOcmeFT4FTUL1gE49JfbK9qO', 4, 1, 0, NULL, '2024-12-02 00:39:37', '2024-12-12 03:35:00'),
 (6, '', 'accounting', '$2y$10$Vz/U3mzfZ1QOD/WSAF44e.P8TcxpiFceauMioV8.3MuBsWly4Ynxq', 5, 1, 0, NULL, '2024-12-02 00:39:46', '2024-12-12 03:35:04'),
-(7, '', 'auditor', '$2y$10$gaZT6PYoj2W8FA8Jf/Tc1egcIbHy1xlXCJ6HrnorzGIVz7qOUZHja', 6, 1, 0, NULL, '2024-12-02 00:40:00', '2024-12-12 03:35:08'),
-(8, 'ghaizar.bautista@bxucity.edu.ph', '21001235800', '$2y$10$ZWO34qySkjKA8RRN9By6b.2XMHh5wrOAOJ1w.5qZpzpTnd3r0m5o2', 4, 1, 0, NULL, '2024-12-12 03:40:44', '2024-12-12 04:17:06'),
-(9, 'ghaizar.bautistaa@bxucity.edu.ph', '13917692', '$2y$10$UN/5xxPp2lu2KHuZCtT4r.Py9Fh4IxMokrf2DXOPwX7gzEvYfBXSi', 4, 1, 0, NULL, '2024-12-12 06:59:04', '2024-12-12 06:59:26');
+(7, '', 'dean', '$2y$10$gaZT6PYoj2W8FA8Jf/Tc1egcIbHy1xlXCJ6HrnorzGIVz7qOUZHja', 7, 1, 0, NULL, '2024-12-02 00:40:00', '2024-12-17 03:26:14'),
+(8, 'ghaizar.bautista@bxucity.edu.ph', '21001235800', '$2y$10$pNzJYYvU4AzCX.8eS4HyG.kK6eZDQahNoS.TguaR4NREh6EZM37WO', 4, 1, 0, NULL, '2024-12-12 03:40:44', '2024-12-15 04:43:09'),
+(9, 'ghaizar.bautistaa@bxucity.edu.ph', '123456', '$2y$10$UN/5xxPp2lu2KHuZCtT4r.Py9Fh4IxMokrf2DXOPwX7gzEvYfBXSi', 3, 1, 0, NULL, '2024-12-12 06:59:04', '2024-12-17 13:59:03');
 
 --
 -- Indexes for dumped tables
@@ -859,16 +935,18 @@ ALTER TABLE `attendance_records`
   ADD KEY `eh_id` (`eh_id`);
 
 --
--- Indexes for table `campus_info`
---
-ALTER TABLE `campus_info`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `department`
 --
 ALTER TABLE `department`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `employment_info`
+--
+ALTER TABLE `employment_info`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`),
+  ADD KEY `course_id` (`course_id`);
 
 --
 -- Indexes for table `enrollment_history`
@@ -891,6 +969,13 @@ ALTER TABLE `messages`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sender_id` (`sender_id`),
   ADD KEY `receiver_id` (`receiver_id`);
+
+--
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `eh_id` (`eh_id`);
 
 --
 -- Indexes for table `permissions`
@@ -958,7 +1043,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_record`
 --
 ALTER TABLE `academic_record`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `academic_year`
@@ -973,28 +1058,28 @@ ALTER TABLE `attendance_records`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `campus_info`
---
-ALTER TABLE `campus_info`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
 -- AUTO_INCREMENT for table `department`
 --
 ALTER TABLE `department`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `employment_info`
+--
+ALTER TABLE `employment_info`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
 -- AUTO_INCREMENT for table `enrollment_history`
 --
 ALTER TABLE `enrollment_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `grade_records`
 --
 ALTER TABLE `grade_records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `messages`
@@ -1003,16 +1088,22 @@ ALTER TABLE `messages`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `permission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `permission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `profiles`
 --
 ALTER TABLE `profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -1068,10 +1159,19 @@ ALTER TABLE `attendance_records`
   ADD CONSTRAINT `eh_id` FOREIGN KEY (`eh_id`) REFERENCES `enrollment_history` (`id`);
 
 --
+-- Constraints for table `employment_info`
+--
+ALTER TABLE `employment_info`
+  ADD CONSTRAINT `employment_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `employment_info_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `department` (`id`);
+
+--
 -- Constraints for table `enrollment_history`
 --
 ALTER TABLE `enrollment_history`
-  ADD CONSTRAINT `enrollment_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `enrollment_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `enrollment_history_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `grade_level` (`id`),
+  ADD CONSTRAINT `enrollment_history_ibfk_5` FOREIGN KEY (`academic_year_id`) REFERENCES `academic_year` (`id`);
 
 --
 -- Constraints for table `grade_records`
@@ -1087,6 +1187,12 @@ ALTER TABLE `grade_records`
 ALTER TABLE `messages`
   ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`eh_id`) REFERENCES `enrollment_history` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `schedules`
