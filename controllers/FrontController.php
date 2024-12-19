@@ -8,6 +8,7 @@ class FrontController {
     public $myEnrollmentStatus;
     public $mycourseID;
     public $myRoleID;
+    private $myEnrollmentStatusData;
     
     public function __construct($db) {
         $this->db = $db;
@@ -16,10 +17,6 @@ class FrontController {
         }
     }
     protected function initializeUserDetails() {
-
-
-
-
         $userId = $_SESSION['user_id'];
 
 
@@ -65,6 +62,27 @@ $this->myRoleID = (int)$stmt->fetch(PDO::FETCH_ASSOC)['role_id'];
         $stmt->bindParam(':academic_year_id', $this->campusDataCurrentAcademicYear, PDO::PARAM_INT); 
         $stmt->execute();
         $this->myEnrollmentStatus = (int) $stmt->fetch(PDO::FETCH_ASSOC)['record_count'];
+
+
+        $stmt = $this->db->prepare("
+            SELECT status
+            FROM enrollment_history eh
+            WHERE 
+            eh.user_id = :user_id
+            AND eh.course_id = :course_id
+            AND eh.academic_year_id = :academic_year_id
+        
+            ");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':course_id', $this->mycourseID, PDO::PARAM_INT); 
+        $stmt->bindParam(':academic_year_id', $this->campusDataCurrentAcademicYear, PDO::PARAM_INT); 
+        $stmt->execute();
+        $this->myEnrollmentStatusData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+
+
+
     }
     
     public function whome() {

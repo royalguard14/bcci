@@ -664,7 +664,7 @@ echo '
 <td>DATE RELEASED <br> '.$currentDateTime.'</td>
 <td>SCHOOL DIRECTOR: <br> <br> <br>'.ucwords($schooldirector['function']).'</td>
 <td>CONFORME: <br> <br> <br>'.ucwords($coeDetails['fullname']).'</td>
-<td>REGISTRAR: <br> <br> <br>'.ucwords($myNames).'</td>
+<td>REGISTRAR: <br> <br> <br>'.ucwords($myNames['fullname']).'</td>
 <td>ACCOUNTING: <br> <br> <br></td>
 <td rowspan="1"><strong>PreFinal</strong></td>
         </tr>

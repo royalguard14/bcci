@@ -65,22 +65,35 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
         </li>
     <?php else: ?>
         <!-- Academic Setup for Users Without Records -->
-        <?php if ($this->acads_report <= 0 && $this->myRoleID == 4): ?>
+        <?php if ($this->myRoleID == 4): ?>
+
+            <?php if ($this->acads_report <= 0): ?>
             <li class="nav-item">
-                <a href="acad_setting" class="nav-link <?= ($current_page == 'acad_setting') ? 'active' : ''; ?>">Academic Setup</a>
+            <a href="acad_setting" class="nav-link <?= ($current_page == 'acad_setting') ? 'active' : ''; ?>">Academic Setup</a>
             </li>
-        <?php elseif ($this->myEnrollmentStatus <= 0 && $this->campusDataEnrollmentStatus == 1 && $this->myRoleID == 4): ?>
+            <?php endif; ?>
+
+            <?php if ($this->campusDataEnrollmentStatus === 1): ?>
+
+            <?php if ($this->myEnrollmentStatus <= 0): ?>
             <!-- Subject Selection -->
             <li class="nav-item">
-                <a href="addsubject" class="nav-link <?= ($current_page == 'addsubject') ? 'active' : ''; ?>">Choose Subject</a>
+            <a href="addsubject" class="nav-link <?= ($current_page == 'addsubject') ? 'active' : ''; ?>">Choose Subject</a>
             </li>
-        <?php endif; ?>
+            <?php endif; ?>
+
+            <?php endif; ?>
+
+
+
+
   
-        <?php if ($this->myRoleID === 4): ?>
             <!-- Student-Specific Links -->
             <li class="nav-item">
                 <a href="profile" class="nav-link <?= ($current_page == 'profile') ? 'active' : ''; ?>">My Profile</a>
             </li>
+
+
             <li class="nav-item dropdown">
                 <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Records</a>
                 <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
@@ -91,6 +104,10 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
                     <li><a href="academic-payment" class="dropdown-item">Payment</a></li>
                 </ul>
             </li>
+
+
+
+
             <li class="nav-item">
                 <a href="documents" class="nav-link <?= ($current_page == 'documents') ? 'active' : ''; ?>">Documents</a>
             </li>
@@ -125,6 +142,10 @@ $current_page = basename($_SERVER['REQUEST_URI'], ".php");
       <div class="content">
         <div class="container">
           <?php echo isset($content) ? $content : "<div class='alert alert-danger'>No content available.</div>"; ?>
+
+
+
+
         </div><!-- /.container-fluid -->
       </div>
       <!-- /.content -->
