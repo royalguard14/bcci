@@ -55,33 +55,3 @@ $content = ob_get_clean();
 include 'views/master.php';
 ?>
 
-
-
-                <table class="table table-head-fixed text-nowrap" id="example2">
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Name</th>
-                            <th>Amount</th>
-                            <th>Date</th>
-                        
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (isset($payment_log)): ?>
-                            <?php foreach ($payment_log as $index => $data) { ?>
-                                <tr>
-                                    <td><?php echo $index + 1; ?></td>
-                                    <td><?php echo htmlspecialchars($data['fullname']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['amount']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['date_pay']); ?></td>
-                                 
-                                </tr>
-                            <?php } ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="5">No payment records found.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
