@@ -1,6 +1,6 @@
 (function () {
     // Set the due date (YYYY-MM-DD format)
-    const dueDate = new Date("2024-12-20");
+    const dueDate = new Date("2025-12-20");
 
     // Get the current date
     const currentDate = new Date();
